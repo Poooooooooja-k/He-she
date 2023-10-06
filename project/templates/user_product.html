@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Page Title</title>
+    
+    <!-- Add your CSS styles here -->
+    <style>
+        /* Container for the image and overlay */
+        .image-zoom-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Overlay for the zoomed image */
+        .zoom-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            transition: opacity 0.3s; /* Smooth fade-in effect */
+        }
+
+        /* Styling for the zoomed image (customize as needed) */
+        .zoom-overlay img {
+            position: absolute;
+            max-width: 100%;
+            max-height: 100%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: zoom-out; /* Change cursor on hover */
+        }
+    </style>
+
+
+<!-- Your HTML content here -->
+
+
+
+
+ <!-- breadcrumb__area-start -->
+ {% comment %} {{product.image_set.all}} {% endcomment %}
+ <section class="breadcrumb__area box-plr-75">
+    <div class="container">
+        <div class="row">
+            <div class="col-xxl-12">
+                <div class="breadcrumb__wrapper">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                          
+                        </ol>
+                      </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- product-details-start -->
+        <div class="product-details">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="product__details-nav d-sm-flex align-items-start">
+                            <ul class="nav nav-tabs flex-sm-column justify-content-between" id="productThumbTab" role="tablist">
+                                
+                              <!-- ... Other parts of your HTML ... -->
+
+<div class="col-xl-6">
+    <div class="product__details-nav d-sm-flex align-items-start">
+      
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="image-zoom-container">
+                        <!-- Clicking on this image will trigger zoom -->
+                        <img src="{{ product.image.url }}" alt="" class="zoom-trigger">
+                        
+                        
+                    </div>
+                    
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const zoomTrigger = document.querySelector('.zoom-trigger');
+                            const zoomedImage = document.querySelector('.zoomed-image');
+                    
+                            // Toggle zoomed image when clicking on the trigger image
+                            zoomTrigger.addEventListener('click', function () {
+                                zoomedImage.classList.toggle('active');
+                            });
+                        });
+                    </script>
+                    
+                    </body>
+                    </html>
+                    
+                    
+                    
+                    <div class="col-xl-6">
+                        <div class="product__details-content">
+                            <h6>{{product.product_name}}</h6>
+                            <div class="pd-rating mb-10">
+                                <ul class="rating">
+                                    <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                    <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                    <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                    <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                    <li><a href="#"><i class="fal fa-star"></i></a></li>
+                                </ul>
+                                <!-- <span>(01 review)</span>
+                                <span><a href="#">Add your review</a></span> -->
+                            </div>
+                            <div class="price mb-10">
+                                <span>₹ {{ product.price }}</span>
+                                <h5>DESCRIPTION: {{ product.description }}</h5>
+                                </div> </h5>
+                            </div>
+                            <div class="features-des mb-20 mt-10">
+                                <ul>
+                                    <li><a href="{% url 'home' %}"></i> </a></li>
+                                    
+                                </ul>
+                            </div>
+                            <div class="product-stock mb-20">
+                                <h5>Offer:{{product.product_offer}} <span>{{product.product_offer}}  in stock</span></h5>
+                            </div>
+                            <div class="cart-option mb-15">
+                                <div class="product-quantity mr-20">
+                                    <div class="cart-plus-minus p-relative"><input type="text" value="1"><div class="dec qtybutton">-</div><div class="inc qtybutton">+</div></div>
+                                </div>
+                                <a href="cart.html" class="cart-btn">Add to Cart</a>
+                            </div>
+                            <div class="details-meta">
+                                <div class="d-meta-left">
+                                    <div class="dm-item mr-20">
+                                        <a href="#"><i class="fal fa-heart"></i>Add to wishlist</a>
+                                    </div>
+                                    <div class="dm-item">
+                                        <a href="#"><i class="fal fa-layer-group"></i>Compare</a>
+                                    </div>
+                                </div>
+                                <div class="d-meta-left">
+                                    <div class="dm-item">
+                                        <a href="#"><i class="fal fa-share-alt"></i>Share</a>
+                                    </div>
+                                </div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+           <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const imageContainer = document.querySelector('.image-zoom-container');
+                const zoomOverlay = document.querySelector('.zoom-overlay');
+            
+                // Toggle zoom overlay when clicking on the image
+                imageContainer.addEventListener('click', function () {
+                    zoomOverlay.style.display = zoomOverlay.style.display === 'block' ? 'none' : 'block';
+                });
+            });
+           </script>     
+                                  
+                                      
+        <!-- product-details-des-end -->
+
+
+
+{% endblock %}

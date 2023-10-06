@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+
+
+<head>
+    <meta charset="utf-8">
+    <title>Orders</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Free HTML Templates" name="keywords">
+    <meta content="Free HTML Templates" name="description">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> 
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{% static 'home/lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{% static 'home/css/style.css' %}" rel="stylesheet">
+</head>
+
+<div class="table-responsive container mt-5">
+   
+    <table class="table table-sm text-start align-middle table-hover mb-0">
+        <thead>
+            <tr class="text-dark">
+                <th scope="col">Order Id</th>
+                
+                <th scope="col">Amount</th>
+                <th scope="col">Payment Type</th>
+                <th scope="col">Date</th>
+                <th scope="col">Status</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr {% if order.status == 'cancelled' %}style=" background-color: #ffcccc;"{% endif %}>  
+                <td>{{ order.id }}</td>
+                
+                
+                <td>{{ order.amount }}</td>
+                <td>{{ order.payment_type }}</td>
+                <td>{{ order.date }}</td>
+                <td>{{ order.status }}</td>
+                <td>
+                    
+                    <form action="{% url 'order_details' order.id %}" method="POST" name="cancel_form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">view</button>
+                    </form>
+                    
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+   
+</div>
+ 
+
+<a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
+
+
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'home/lib/easing/easing.min.js' %}"></script>
+<script src="{% static 'home/lib/owlcarousel/owl.carousel.min.js' %}"></script>
+
+<!-- Contact Javascript File -->
+<script src="{% static 'home/mail/jqBootstrapValidation.min.js' %}"></script>
+<script src="{% static 'home/mail/contact.js' %}"></script>
+
+<!-- Template Javascript -->
+<script src="{% static 'home/js/main.js' %}"></script>
+
+</body>
+{% endblock %}

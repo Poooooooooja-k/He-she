@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit sub category</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.5.0/css/bootstrap.min.css">
+    
+    
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="{% static 'admin/admin/lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+    <link href="{% static 'admin/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet" />
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="{% static 'admin/admin/css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="{% static 'admin/admin/css/style.css' %}" rel="stylesheet">
+     <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.5.0/js/bootstrap.bundle.min.js"></script>
+
+</head>
+
+<body>
+    <div class="container-xxl position-relative bg-white d-flex p-0">
+        <!-- Sidebar Start -->
+        <div class="sidebar pe-4 pb-3">
+            {% include 'snippets/adminsidebar.html' %}
+        </div>
+        <!-- Sidebar End -->
+
+        <!-- Content Start -->
+        <div class="content">
+            <!-- Navbar Start -->
+            <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">
+                <a href="#" class="navbar-brand d-flex d-lg-none me-4">
+                    <!-- <h2 class="text-primary mb-0"><i class="fa fa-hashtag"></i></h2> -->
+                </a>
+                <a href="#" class="sidebar-toggler flex-shrink-0">
+                    <i class="fa fa-bars"></i>
+                </a>
+                <!-- <form class="d-none d-md-flex ms-4">
+                    <input class="form-control border-0" type="search" placeholder="Search">
+                </form> -->
+                <div class="navbar-nav align-items-center ms-auto">
+                   
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            <img class="rounded-circle me-lg-2" src="{% static 'admin/admin/img/looogoo.png' %}" alt="" style="width: 40px; height: 40px;">
+                            <span class="d-none d-lg-inline-flex">POOJA</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
+                            <a href="#" class="dropdown-item">My Profile</a>
+                            <a href="#" class="dropdown-item">Settings</a>
+                            <a href="{% url 'admin_logout' %}" class="dropdown-item">Log Out</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+             <!-- edit -->
+             <div id="#" class="">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="{% url 'update_sub_category' sub_category_id=sub_category.id %}"  method="post" enctype="multipart/form-data">
+
+                            {% csrf_token %}
+                            <div class="modal-header">						
+                                <h4 class="modal-title">Edit sub Category</h4>
+                                
+                            </div>
+
+                                <div class="form-group">
+                                    <label>main_category</label>
+                                    <div class="col-sm-6">
+                                      
+                                        <select class="form-control" name="categories">
+                                          {% for i in cat %}
+                                          
+                                          <option value="{{ i.id }}">{{i.category_name}}</option>
+                                          
+                                          {% endfor %}
+                                          
+                                        </select>
+                                        
+                                      </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>sub_category_name</label>
+                                    <input name="sub_category_name" type="text" class="form-control"  value= "{{ sub_category.sub_category_name }}" required>
+                                </div>
+
+                                  
+                            <div class="modal-footer">
+                                <a href="{% url 'sub_category' %}"><button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button></a>
+                                <input type="submit" class="btn btn-success" value="Update">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>

@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+ 
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div id="messages-container">
+    {% if messages %}
+        <ul class="messages text-primary" style="list-style: none;">
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    <li class="success">{{ message }}</li>
+
+                {% elif message.tags == 'error' %}
+                    <li class="error">{{ message }}</li>
+
+                {% elif message.tags == 'warning' %}
+                    <li style="color: red;" class="warning">{{ message }}</li>
+
+                {% else %}
+                    <li>{{ message }}</li>
+
+                {% endif %}
+
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+
+
+
+
+<div class="row mb-5">
+    <form class="col-md-12" method="post">
+        <div class="site-blocks-table">
+            {% for prod in cart_items %}
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; background-color: #f9f9f9; box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);">
+                        <img src="{{ prod.product.image.url }}" alt="" style="width: 200px; float: left; margin-right: 20px;">
+                        <h2 class="h5 text-black font-weight-bold">{{ prod.product.product_name }}</h2>
+                        <p style="color: green;">Price: ₹{{ prod.product.price }}</p>
+                        <p style="color: red;">Description: {{ prod.product.description }}</p>
+
+                        <label for="quantity">Qty:</label>
+                        <!-- Add a unique identifier to the quantity input field -->
+                        
+                        <!-- <input type="number" id="quantity_{{ prod.id }}" name="quantity" min="1" value="{{ prod.quantity }}" class="form-control mb-3" style="width: 50px;"
+                        data-price="{{ prod.product.price }}" oninput="updateTotalPrice('{{ prod.id }}')"> -->
+                        <div class="input-group mb-3" style="max-width: 120px;">
+                            <div class="input-group-prepend">
+                                <button onclick="updateQuantity('{{ prod.product_id }}', 'decrease')" class="btn btn-outline-primary js-btn-minus" type="button">&minus;</button>
+                            </div>
+                            <input id="quantity-input-{{ prod.product_id }}" type="number" min="1" class="form-control text-center" value="{{ prod.quantity }}" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+                            <div class="input-group-append">
+                                <button onclick="updateQuantity('{{ prod.product_id }}', 'increase')" class="btn btn-outline-primary js-btn-plus" type="button">&plus;</button>
+                            </div>
+                        </div>
+                       
+                        <a href="{% url 'remove_from_cart' prod.id %}" class="btn btn-warning">Remove</a>
+                       
+                        
+                        <!-- Display the total price for this item -->
+                        <!-- <p class="text-primary font-weight-bold" id="total_price_{{ prod.id }}">Total Price: ${{ subtotal }}</p> -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+             <!-- Display the total cart price -->
+             <div class="card-header bg-warning border-0 width:50px">
+              <h4 class="font-weight-semi-bold m-0">Cart Summary</h4>
+          </div>
+             <div class="row">
+                <div class="col-md-12">
+                    <div style="border: 1px solid #ddd; padding: 20px; background-color: #f9f9f9; box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);">
+                        <p class="text-primary font-weight-bold" id="cart_total">Sub total:₹{{ subtotal }}</p>
+                    
+                    <div class="d-flex justify-content-between">
+                        <h6 class="font-weight-medium">Shipping</h6>
+                    {% if cart_items %}
+                        <h6 class="font-weight-medium">₹10</h6>
+                    {% else %}
+                        <h6 class="font-weight-medium">₹0</h6>
+                    {% endif %}
+                    </div>
+                </div>
+                <div style="border: 1px solid #ddd; padding: 20px; background-color: #f9f9f9; box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);">
+                    <p class="text-primary font-weight-bold" id="cart_total">Total: {{ total }}</p>
+                
+              
+                
+                  {% if cart_items %}
+                      <a href="{% url 'check_out' %}" class="btn btn-block btn-primary">Proceed To Checkout</a>
+                  {% else %}
+                      <a href="" class="btn-primary">Cart is Empty</a>
+                  {% endif %}
+
+              </div>
+          </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function updateQuantity(productId, action) {
+            var quantityInput = document.getElementById('quantity-input-' + productId);
+            var quantity = parseInt(quantityInput.value);
+    
+            if (action === 'increase') {
+                quantity += 1;
+            } else if (action === 'decrease') {
+                quantity -= 1;
+            }
+    
+            if (quantity < 1) {
+                alert('Quantity must be at least 1.');
+                return;
+            }
+    
+            var csrfToken = getCookie('csrftoken');
+    
+            fetch(`/update-cart/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    'quantity': quantity
+                })
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Error updating cart item.');
+                }
+            })
+            .then(function(data) {
+                console.log(data.message);
+                location.reload();
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Error updating cart item.');
+            });
+        }
+ 
+</script>
+
+
+     
+<!-- ----------------------------------- -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- Bootstrap JS -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- --------------------------------------------------- -->
+
+{% endblock %}

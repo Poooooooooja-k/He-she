@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<!-- Bootstrap CSS -->
+
+ 
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/tiny-slider.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+
+<!-- Add Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- Add Bootstrap JavaScript (requires jQuery) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+
+<div class="untree_co-section">
+    <div class="container">
+      <form id="order-form" action="{% url 'order_placed' %}" method="post">
+        {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6 mb-5 mb-md-0">
+          <h2 class="h3 mb-3 text-black">Billing Details</h2>
+          <div class="p-3 p-lg-5 border bg-white">
+           
+            <div class="form-group row">
+              <div class="col-md-6">
+                <label for="c_fname" class="text-black">First Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}">
+              </div>
+             
+            </div>
+
+            
+
+                <div class="form-group row">
+                  <div class="col-md-12">
+                    <label for="addressDropdown">Select Address:</label>
+                    <select id="addressDropdown" name="addressId">
+                        <option value="">Select an address</option>
+                        {% for i in address %}
+                        <option value="{{ i.id }}">{{  i.full_name }} {{ i.house_no  }}, {{ i.street }},{{ i.city}},{{ i.state}}</option>
+                        {% endfor %}
+                    </select>
+
+                  </div>
+                </div>
+        
+
+            <div class="form-group row mb-5">
+              <!-- <div class="col-md-6">
+                <label for="c_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="c_email_address" name="c_email_address">
+              </div> -->
+              <div class="col-md-6">
+                <label for="c_phone" class="text-black">Phone <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="phone_number" name="phone_no" value="{{ user.phone_number }}">
+              </div>
+            </div>
+
+                <!-- different shipping address -->
+                <form method="post" action="{% url 'add_address' %}">
+                {% csrf_token %}
+            <div class="form-group ">
+                <label for="c_ship_different_address" class="text-black" data-bs-toggle="collapse" href="#ship_different_address" role="button" aria-expanded="false" aria-controls="ship_different_address">
+                    <input type="checkbox" value="1" id="c_ship_different_address"> Ship To A Different Address?
+                  </label>
+                  <div class="collapse" id="ship_different_address">
+                  <div class="py-2">
+                    <div class="form-group row">
+                      <div class="col-md-6">
+                        <label for="c_diff_fname" class="text-black">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="full_name" name="full_name">
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <div class="col-md-6">
+                        <label for="c_diff_fname" class="text-black">House_no<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="house_no" name="house_no">
+                      </div>
+                    </div>
+
+                    <div class="form-group row  mb-3">
+                      <div class="col-md-12">
+                        <label for="c_diff_state_country" class="text-black">post code <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="post_code" name="post_code">
+                      </div>
+                    </div>
+
+
+                     <div class="form-group row">
+                      <div class="col-md-6">
+                        <label for="c_diff_postal_zip" class="text-black">state <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="state" name="state">
+                      </div>
+                    </div> 
+                    <div class="form-group row mb-5">
+                      <div class="col-md-6">
+                        <label for="c_diff_phone" class="text-black">street <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="street" name="street" >
+                      </div>
+                    </div> 
+                    <div class="form-group row mb-5">
+                      <div class="col-md-6">
+                        <label for="c_diff_phone" class="text-black">city<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="city" name="city" >
+                      </div>
+                    </div> 
+
+                    <div class="form-group row mb-5">
+                      <div class="col-md-6">
+                        <label for="c_diff_phone" class="text-black">Phone no<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="phone_no" name="phone_no" >
+                      </div>
+                    </div> 
+                    <button type="submit" class="btn-success">Submit</button>
+                  </div>
+                </div>
+              </div>
+              </form>
+            
+
+
+              <!-- end of new shipping address -->
+
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+
+          <div class="row mb-5">
+            <div class="col-md-12">
+              <h2 class="h3 mb-3 text-black">Coupon Code</h2>
+              <div class="p-3 p-lg-5 border bg-white">
+
+                <label for="c_code" class="text-black mb-3">Enter your coupon code if you have one</label>
+                <div class="input-group w-75 couponcode-wrap">
+                  <input type="text" class="form-control me-2" id="c_code" placeholder="Coupon Code" aria-label="Coupon Code" aria-describedby="button-addon2">
+                  <div class="input-group-append">
+                    <button class="btn btn-black btn-sm" type="button" id="button-addon2">Apply</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-5">
+            <div class="col-md-12">
+              <h2 class="h3 mb-3 text-black">Your Order</h2>
+              <div class="p-3 p-lg-5 border bg-white">
+                <table class="table site-block-order-table mb-5">
+                  <thead>
+                    <th>Product</th>
+                    <th>Total</th>
+                    <th>quantity</th>
+                  </thead>
+                  {% for cart_item in cart_items %}
+                  <tbody>
+                    <tr>
+                      <td>{{ cart_item.product.product_name}}</td>
+                      <td>₹{{ cart_item.product.price }}</td>
+                      <td>x {{ cart_item.quantity }}</td>
+
+                    </tr>
+                    {% endfor %}
+                    <!-- <tr>
+                      <td>Polo Shirt <strong class="mx-2">x</strong>   1</td>
+                      <td>$100.00</td>
+                    </tr> -->
+                
+                    <tr>
+                      <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
+                      <td class="text-black">₹{{ subtotal }}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-black font-weight-bold"><strong>Shipping charge</strong></td>
+                      <td class="text-black font-weight-bold"><strong>₹10</strong></td>
+
+                    </tr>
+                    <tr>
+                      <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
+                      <td class="text-black font-weight-bold"><strong>₹{{ total }}</strong></td>
+                    </tr>
+                    
+                  </tbody>
+                </table>
+
+                <div class="border p-3 mb-3">
+                  <div class="card-body">
+                    <div class="form-group">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" class="custom-control-input" name="payment" id="directcheck" value="cod" onchange="handlePaymentSelection()">
+                            <label class="custom-control-label" for="directcheck">COD (cash on delivery)</label>
+                        </div>
+                    </div>
+                    
+                    
+
+                </div>
+
+                 
+
+                <div class="card-footer border-secondary bg-transparent">
+                  <!-- <a  class="btn btn-md btn-primary my-3 py-3">Place Order</a> -->
+                  <button type="submit" class="btn btn-md btn-primary my-3 py-3">Place Order</button>
+
+                  
+                  <div class="row px-xl-5">
+                    <div style="padding-top: -250px;" class="col-lg-8">
+                        <div class="error-message">
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <p style="font-size: 25px;" class="text-danger">{{ message }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                  </div>
+                 
+              </div>
+              </div>
+            </div>
+          </div>
+       
+        </div>
+      </div>
+      </form>
+      <!-- </form> -->
+    </div>
+  </div>
+  
+
+
+
+  
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/tiny-slider.js"></script>
+<script src="js/custom.js"></script>
+
+
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- Bootstrap JS -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+{% endblock %}
+
+
+

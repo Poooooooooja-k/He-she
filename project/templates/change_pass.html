@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change password</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Account Details Box -->
+                <div class="card">
+                    <div class="card-body">
+                          
+                            <h5 class="card-title"><i class="fas fa-user" style="margin-right: 10px;"></i> Account Details</h5>
+                            <!-- Add a horizontal line -->
+                     
+
+                        <hr>
+                        <p class="card-title"> <i class="fas fa-key" style="margin-right: 10px;"></i><a href="#" style="color: black;">Change password</a>
+                        </p>
+                        <!-- Divider line -->
+                        <hr>
+                
+
+
+                        <hr>
+                        <!-- Orders -->
+                        <p class="card-title">
+                            <i class="fas fa-shopping-cart" style="margin-right: 10px;"></i><a href="#" style="color: black;">Orders</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                       
+                
+                        <!-- Download Invoice -->
+                        <!-- <p class="card-title"> <i class="fas fa-file-invoice"   style="margin-right: 10px;"></i><a href="#" style="color: black;">Download invoice</a>
+                        </p> -->
+                        <!-- Add a horizontal line -->
+                        <!-- <hr> -->
+                       
+                        <hr>
+                
+                        <!-- Payment Method -->
+                        <p class="card-title"> <i class="fas fa-credit-card"   style="margin-right: 10px;"></i> <a href="#" style="color: black;">Payment method</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                       
+                        <hr>
+                        <!-- Address -->
+                        <p class="card-title">  <i class="fas fa-map-marker-alt"  style="margin-right: 10px;"></i><a href="#" style="color: black;">Address</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                
+
+                        <hr>
+                        <!-- Logout -->
+                        <p class="card-title"> <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i> <a href="{% url 'logout' %}" style="color: black;">Logout</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                       
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                        
+    
+                    <div class="form-group">
+                        <label for="full name">password</label>
+                        <input type="text" class="form-control" id="pass" value="{{ user.name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">new password</label>
+                        <input type="text" class="form-control" id="new_pass" value="{{ user.email }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">confirm password</label>
+                        <input type="text" class="form-control" id="confirm_pass" value="{{ user.email }}">
+                    </div>
+                
+                    <br>
+                    <button class="btn btn-danger">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

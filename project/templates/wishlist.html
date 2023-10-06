@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+
+<!-- wishlist.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+    <h1>My Wishlist</h1>
+    <ul class="list-group">
+        {% for wishlist_item in wishlist_items %}
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <img src="{{ wishlist_item.product.image.url }}" width="200px" height="200px" alt="" class="img-fluid">
+                    <h4>{{ wishlist_item.product.product_name }}</h4>
+                    <p class="text-success">Price: ${{ wishlist_item.product.price }}</p>
+                    <p>Description: {{ wishlist_item.product.description }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'add_to_cart' wishlist_item.product.id %}" class="btn btn-danger ">Move to Cart</a>
+                    <a href="{% url 'remove_from_wishlist' wishlist_item.id %}" class="btn btn-dark">Remove from Wishlist</a>
+                </div>
+            </div>
+        </li>
+        {% empty %}
+        <li class="list-group-item">Your wishlist is empty.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+    <!-- Add Bootstrap JavaScript and jQuery (if not already included) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
+
+{%  endblock %}

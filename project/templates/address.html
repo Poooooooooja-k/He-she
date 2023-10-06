@@ -1,0 +1,121 @@
+{% extends 'base.html '%}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address page</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Account Details Box -->
+                <div class="card">
+                    <div class="card-body">
+                          
+                            <h5 class="card-title"><i class="fas fa-user" style="margin-right: 10px;"></i> Account Details</h5>
+                            <!-- Add a horizontal line -->
+                     
+
+                        <hr>
+                        <p class="card-title"> <i class="fas fa-key" style="margin-right: 10px;"></i><a href="#" style="color: black;">Change password</a>
+                        </p>
+                        <!-- Divider line -->
+                        <hr>
+                
+
+
+                        <hr>
+                        <!-- Orders -->
+                        <p class="card-title">
+                            <i class="fas fa-shopping-cart" style="margin-right: 10px;"></i><a href="#" style="color: black;">Orders</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                       
+                
+                        <!-- Download Invoice -->
+                        <!-- <p class="card-title"> <i class="fas fa-file-invoice"   style="margin-right: 10px;"></i><a href="#" style="color: black;">Download invoice</a>
+                        </p> -->
+                        <!-- Add a horizontal line -->
+                        <!-- <hr> -->
+                       
+                        <hr>
+                
+                        <!-- Payment Method -->
+                        <p class="card-title"> <i class="fas fa-credit-card"   style="margin-right: 10px;"></i> <a href="#" style="color: black;">Payment method</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                       
+                        <hr>
+                        <!-- Address -->
+                        <p class="card-title">  <i class="fas fa-map-marker-alt"  style="margin-right: 10px;"></i><a href="#" style="color: black;">Address</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                
+
+                        <hr>
+                        <!-- Logout -->
+                        <p class="card-title"> <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i> <a href="{% url 'logout' %}" style="color: black;">Logout</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                       
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-4">
+                        <a href="{% url 'add_address' %}"><button type="button" class="btn btn-success" data-dismiss="modal">Add Address</button></a><br><br><br>
+                        <div class="table-responsive">
+                            <table class="table text-start align-middle table-bordered table-hover mb-0">
+                                <thead>
+                                    <tr class="text-dark">
+                                        <th>Address</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in address %}
+                                    <tr>
+                                        <td>{{ i.full_name }}<br>
+                                            {{ i.house_no }}, {{ i.street }},<br>
+                                            {{ i.city }}, {{ i.state }}, {{ i.post_code }}<br>
+                                            Phone: {{ i.phone_no }}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'edit_address' i.id %}" style="color: black;">
+                                                <i class="fas fa-edit"></i> 
+                                            </a><br><br><br>
+                                            <a href="{% url 'delete_address' i.id %}" style="color: black;" onclick="return confirm('Are you sure you want to delete this address?')">
+                                                <i class="fas fa-trash-alt"></i> 
+                                            </a>
+                                            <br><br>
+                                            
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>           
+</body>
+</html>
+{% endblock %}
+

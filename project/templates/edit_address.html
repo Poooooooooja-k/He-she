@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Address</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Account Details Box -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-user" style="margin-right: 10px;"></i> Account Details</h5>
+                        <!-- Add your account details content here -->
+                        <hr>
+                        <p class="card-title"> <i class="fas fa-key" style="margin-right: 10px;"></i><a href="#" style="color: black;">Change password</a>
+                        </p>
+                        <!-- Divider line -->
+                        <hr>
+                        <!-- Orders -->
+                        <p class="card-title">
+                            <i class="fas fa-shopping-cart" style="margin-right: 10px;"></i><a href="#" style="color: black;">Orders</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                        <!-- Payment Method -->
+                        <p class="card-title"> <i class="fas fa-credit-card" style="margin-right: 10px;"></i> <a href="#" style="color: black;">Payment method</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                        <!-- Address -->
+                        <p class="card-title"> <i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i><a href="#" style="color: black;">Address</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                        <!-- Logout -->
+                        <p class="card-title"> <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i> <a href="{% url 'logout' %}" style="color: black;">Logout</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                    </div>
+                </div>
+            </div>
+
+        <div class="col-md-8">
+            <!-- Add Address Form -->
+            <h1>Edit Address</h1>
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Existing address data to populate the fields -->
+                <input type="hidden" name="address_id" value="{{ address.id }}">
+                
+                <label for="full_name">Full Name:</label>
+                <input type="text" id="full_name" name="full_name" required value="{{ address.full_name }}"><br><br>
+            
+                <label for="house_no">House No:</label>
+                <input type="text" id="house_no" name="house_no" required value="{{ address.house_no }}"><br><br>
+            
+                <label for="post_code">Post Code:</label>
+                <input type="text" id="post_code" name="post_code" required value="{{ address.post_code }}"><br><br>
+            
+                <label for="state">State:</label>
+                <input type="text" id="state" name="state" required value="{{ address.state }}"><br><br>
+            
+                <label for="street">Street:</label>
+                <input type="text" id="street" name="street" required value="{{ address.street }}"><br><br>
+            
+                <label for="phone_no">Phone No:</label>
+                <input type="text" id="phone_no" name="phone_no" value="{{ address.phone_no }}"><br><br>
+            
+                <label for="city">City:</label>
+                <input type="text" id="city" name="city" required value="{{ address.city }}"><br><br>
+            
+                <button type="submit" class="btn btn-success">Update Address</button>
+            </form>
+        </div>
+            
+    </div>
+    {% endblock %}
+</body>
+</html>

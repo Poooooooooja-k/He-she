@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <!-- Add Bootstrap CSS link here -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Account Details Box -->
+                <div class="card">
+                    <div class="card-body">
+                          
+                            <h5 class="card-title"><i class="fas fa-user" style="margin-right: 10px;"></i> Account Details</h5>
+                            <!-- Add a horizontal line -->
+                     
+
+                        <hr>
+                        <p class="card-title">
+                            <i class="fas fa-key" style="margin-right: 10px;"></i>
+                            <a href="#" style="color: black;" data-toggle="modal" data-target="#exampleModalLongs">
+                                Change password
+                            </a>
+                        </p>
+                        
+                        <!-- Divider line -->
+                        <hr>
+                
+
+
+                        <hr>
+                        <!-- Orders -->
+                        <p class="card-title">
+                            <i class="fas fa-shopping-cart" style="margin-right: 10px;"></i><a href="{% url 'customer_order' %}" style="color: black;">Orders</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                       
+                
+                        <!-- Download Invoice -->
+                        <!-- <p class="card-title"> <i class="fas fa-file-invoice"   style="margin-right: 10px;"></i><a href="#" style="color: black;">Download invoice</a>
+                        </p> -->
+                        <!-- Add a horizontal line -->
+                        <!-- <hr> -->
+                       
+                        <hr>
+                
+                        <!-- Payment Method -->
+                        <p class="card-title"> <i class="fas fa-credit-card"   style="margin-right: 10px;"></i> <a href="#" style="color: black;">Payment method</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                       
+                        <hr>
+                        <!-- Address -->
+                        <p class="card-title">  <i class="fas fa-map-marker-alt"  style="margin-right: 10px;"></i><a href="{% url 'address' %}" style="color: black;">Address</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                
+
+                        <hr>
+                        <!-- Logout -->
+                        <p class="card-title"> <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i> <a href="{% url 'logout' %}" style="color: black;">Logout</a>
+                        </p>
+                        <!-- Add a horizontal line -->
+                        <hr>
+                       
+                    </div>
+                </div>
+                
+                
+            </div>
+            <div class="col-md-8">
+                <!-- User Information -->
+                <div class="card">
+                    <div class="card-header">
+                        ACCOUNT DETAILS 
+                    </div>
+                    <div class="card-body">
+                        
+    
+                            <div class="form-group">
+                                <label for="full name">Full Name</label>
+                                <input type="text" class="form-control" id="name" value="{{ user.name }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="text" class="form-control" id="email" value="{{ user.email }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Phone no</label>
+                                <input type="text" class="form-control" id="phone number" value="{{ user.phone_number }}">
+                            </div>
+                        
+                            <br>
+                            <button id="updateProfileBtn" class="btn btn-danger" data-toggle="modal" data-target="#profileUpdateModal">Update</button>
+
+<!-- Modal for Profile Update -->
+<div class="modal fade" id="profileUpdateModal" tabindex="-1" role="dialog" aria-labelledby="profileUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profileUpdateModalLabel">Update Profile</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Add your update form fields here -->
+                <form method="post" action="{% url 'update_profile' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="full name">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="text" class="form-control" id="email" name="email" value="{{ user.email }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Phone no</label>
+                        <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ user.phone_number }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+    <ul class="messages list-unstyled text-success" >
+        {% for message in messages %}
+            <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<script>
+$(document).ready(function () {
+    console.log("Document is ready."); // Check if this message appears in the console
+    
+    // Show the modal when the "update" button is clicked
+    $("#updateProfileBtn").click(function () {
+        console.log("Update button clicked."); // Check if this message appears in the console
+        $("#profileUpdateModal").modal("show");
+    });
+});
+</script>
+
+
+
+
+<!-- modal for change password  -->
+<div class="modal fade" id="exampleModalLongs" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Change Password</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+         
+            <form method="POST" action="{% url 'changepassword' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label>Old Password</label>
+                    <input name="old" type="password" class="form-control" required>
+            
+                    <label>New Password</label>
+                    <input name="new_password1" type="password" class="form-control" required>
+            
+                    <label>Confirm Password</label>
+                    <input name="new_password2" type="password" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+      
+      </div>
+    </div>
+  </div>
+
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- Bootstrap JS -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
+
+{% endblock %}
+                         
