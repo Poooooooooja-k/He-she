@@ -2,6 +2,15 @@
 {% block content %}
 {% load static %}
 
+<style>
+    .checkout{
+        color: white;
+        font-size: large;
+        background-color: black;
+        margin-left: 655px;
+        border-radius: 5px;   
+    }
+</style>
  
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -42,7 +51,7 @@
                         <img src="{{ prod.product.image.url }}" alt="" style="width: 200px; float: left; margin-right: 20px;">
                         <h2 class="h5 text-black font-weight-bold">{{ prod.product.product_name }}</h2>
                         <p style="color: green;">Price: ₹{{ prod.product.price }}</p>
-                        <p style="color: red;">Description: {{ prod.product.description }}</p>
+                        <p style="color: black;">Description: {{ prod.product.description }}</p>
 
                         <label for="quantity">Qty:</label>
                         <!-- Add a unique identifier to the quantity input field -->
@@ -59,7 +68,7 @@
                             </div>
                         </div>
                        
-                        <a href="{% url 'remove_from_cart' prod.id %}" class="btn btn-warning">Remove</a>
+                        <a  href="{% url 'remove_from_cart' prod.id %}" class="">Remove</a>
                        
                         
                         <!-- Display the total price for this item -->
@@ -93,9 +102,9 @@
               
                 
                   {% if cart_items %}
-                      <a href="{% url 'check_out' %}" class="btn btn-block btn-primary">Proceed To Checkout</a>
+                      <a href="{% url 'check_out' %}" class="checkout">Proceed To Checkout</a>
                   {% else %}
-                      <a href="" class="btn-primary">Cart is Empty</a>
+                      <a href="" class="checkout">Cart is Empty</a>
                   {% endif %}
 
               </div>

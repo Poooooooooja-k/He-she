@@ -58,6 +58,7 @@ urlpatterns=[
     path('edit_address/<int:id>/', views.edit_address, name='edit_address'),
     path('delete_address/<int:id>/', views.delete_address, name='delete_address'),
 
+
     path('changepassword/',views.changepassword,name='changepassword'),
 
 
@@ -84,7 +85,7 @@ urlpatterns=[
     # admin order
     path('order/',views.order,name = 'order'),
     path('update_order/', views.updateorder, name='update_order'),
-    path('admin_order_details/<int:order_id>/', views.admin_order_details, name='admin_order_details'),
+
 
     # costumer
     path('order_details/<int:id>',views.order_details,name='order_details'),
@@ -94,6 +95,15 @@ urlpatterns=[
     # forgot password
     path('forgot_password/', views.forgot_password, name='forgot_password'),
     path('reset_password/', views.reset_password, name='reset_password'),
+
+
+    # variation
+    path('variations/',views.variations,name='variations'),
+    path('variations/<int:product_id>/',views.variations,name='variations'),
+    path('delete_variation/<int:variation_id>/', views.delete_variation, name='delete_variation'),
+    path('edit_variation/<int:variation_id>/',views.edit_variation,name='edit_variations' ),
+    path('update_variations/<int:variation_id>/',views.update_variation,name='update_variation'),
+    path('add_variations/',views.add_variation,name='add_variation'),
 
 ]
 if settings.DEBUG:

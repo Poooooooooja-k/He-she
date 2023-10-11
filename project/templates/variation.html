@@ -102,7 +102,7 @@
                         <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
                             <a href="#" class="dropdown-item">My Profile</a>
                             <a href="#" class="dropdown-item">Settings</a>
-                            <a href="{% url 'admin_logout' %}" class="dropdown-item">Log Out</a>
+                            <a href="{% url 'logout' %}" class="dropdown-item">Log Out</a>
                         </div>
                     </div>
                 </div>
@@ -117,57 +117,54 @@
                         <h4 class="mb-0">Products</h4>
                         <a href="">Show All</a>
                         <div>
-                            <!-- <a href="#addEmployeeModal" class="btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Add New Product</span></a> -->
-                            <a href="{% url 'add_product' %}" class="btn btn-success">Add Product</a>
-
+                            
+                            <a href="{% url 'add_variation'  %}" class="btn btn-success">Add Variation</a>
+   
 
                         </div>
                     </div>
-
                     
                     <div class="table-responsive">
                         <table class="table text-start align-middle table-bordered table-hover mb-0">
                             <thead>
                                 <tr class="text-dark">
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Description</th>
-                                    <th scope="col">Category</th>
-                                    <th scope="col">Sub category</th>
-                                    <th scope="col">Stock</th>
+                                    <th scope="col">Product</th>
+                                    <th scope="col">Color</th>
+                                    <th scope="col">Image</th>
                                     <th scope="col">Price</th>
-                                    <!-- <th scope="col">Offer %</th> -->
+                                    <th scope="col">Action</th>
                                     
-                                    <th scope="col">Images</th>
-                                    <th scope="col">Variations</th>
-                                    <th scope="col">Actions</th>
+                                    
                                 </tr>
                             </thead>
-                            <!-- Table Body -->
+                            
                             <tbody>
-                                {% for product in page_obj %}
+                                {% for variation in variations %}
                                 <tr>
-                                    <td>{{ product.product_name }}</td>
-                                    <td>{{ product.description }}</td>
-                                    <td>{{ product.category.category_name }}</td>
-                                    <td>{{ product.Sub_category.sub_category_name }}</td>
-                                    <td>{{ product.stock }}</td>
-                                    <td>{{ product.price }}</td>
-                                    <td><img src="{{product.image.url}}" alt="" width="100" height="100"></td>
+                                    <td>{{ variation.product.product_name }}</td>
+                                    <td>{{ variation.color }}</td>
                                     <td>
-                                        <a href="{% url 'variations' %}" cls="btn-success">Add variation</a>
+                                       
+                                        <img src="{{ variation.image.images.url }}" alt="Product Image" width="200" height="200">
+                                      
+                                       
                                     </td>
-                                   
+                                    <td>{{ variation.price }}</td>
                                     <td>
-                                        <a href="{% url 'edit_product' product_id=product.id %}" class="edit" data-toggle="modal">
+                                        <a href="{% url 'edit_variations' variation.id %}" class="edit" data-toggle="modal">
                                             <i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                                         </a>
-                                        <a href="#" class="delete" data-toggle="modal" data-target="#deleteModal{{ product.id }}">
-                                            <i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
-                                        </a>
+                                     
+                                        
+                                            <a href="#" class="delete" data-toggle="modal" data-target="#deleteModal{{ variation.id }}">
+                                                <i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                                            </a>
+                                      
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
+                            
                         </table>
                         <!-- Pagination -->
                         <div class="pagination">
@@ -183,34 +180,32 @@
                             <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
                             {% endif %}
                         </div>
-                        <!-- Delete confirmation modals -->
-                        {% for product in page_obj %}
-                        <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="deleteModalLabel">Delete Product</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>Are you sure you want to delete this product?</p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                        <form action="{% url 'delete_product' product_id=product.id %}" method="post">
-                                            {% csrf_token %}
-                                            <input type="submit" class="btn btn-danger" value="Delete">
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    
-                       
+                       <!-- Delete confirmation modals -->
+                       {% for variation in variations %}
+                       <div class="modal fade" id="deleteModal{{ variation.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                           <div class="modal-dialog" role="document">
+                               <div class="modal-content">
+                                   <div class="modal-header">
+                                       <h5 class="modal-title" id="deleteModalLabel">Delete Variation</h5>
+                                       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                           <span aria-hidden="true">&times;</span>
+                                       </button>
+                                   </div>
+                                   <div class="modal-body">
+                                       <p>Are you sure you want to delete this variation?</p>
+                                   </div>
+                                   <div class="modal-footer">
+                                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                       <form action="{% url 'delete_variation' variation_id=variation.id %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="submit" class="btn btn-danger" value="Delete">
+                                    </form>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                       {% endfor %}
+                   </div>
             <!-- Footer Start -->
             <div class="container-fluid pt-4 px-4">
                 <div class="bg-light rounded-top p-4">
@@ -220,7 +215,7 @@
                         </div>
                         <div class="col-12 col-sm-6 text-center text-sm-end">
                             <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-                            Designed By <a href="https://htmlcodex.com">POOJA</a>
+                            Designed By <a href="https://htmlcodex.com">POOJA </a>
                         <br>
                         Distributed By <a class="border-bottom" href="#" target="_blank">He & She</a>
                         </div>
@@ -237,21 +232,21 @@
     </div>
 
     <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'admin/lib/chart/chart.min.js' %}"></script>
-    <script src="{% static 'admin/lib/easing/easing.min.js' %}"></script>
-    <script src="{% static 'admin/lib/waypoints/waypoints.min.js' %}"></script>
-    <script src="{% static 'amdin/lib/owlcarousel/owl.carousel.min.js' %}"></script>
-    <script src="{% static 'admin/lib/tempusdominus/js/moment.min.js' %}"></script>
-    <script src="{% static 'admin/lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
-    <script src="{% static 'admin/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    
+
+    <script src="{% static 'admin/admin/lib/chart/chart.min.js' %}"></script>
+    <script src="{% static 'admin/admin/lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'admin/admin/lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'admin/admin/lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'admin/admin/lib/tempusdominus/js/moment.min.js' %}"></script>
+    <script src="{% static 'admin/admin/lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'admin/admin/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
 
     <!-- Template Javascript -->
-    <script src="{% static 'admin/js/main.js' %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{% static 'admin/admin/js/main.js' %}"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.5.0/js/bootstrap.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
 
 
 </body>

@@ -13,6 +13,7 @@ from .models import Wishlist
 from .models import Cart
 from .models import Order
 from .models import OrderItem
+from .models import*
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 from django.core.exceptions import ObjectDoesNotExist
@@ -33,23 +34,18 @@ def base(request):
     return render(request,'base.html')
 
 def home(request):
-    # product=Product.objects.all()
-    # # product=Product.objects.filter(category__category_name='category')
-    # print(product)
-    # context={
-    #     'product':product,
-    # }
+    if 'admin' in request.session:
+        return redirect('dashboard')
     return render(request,'home.html')
 
 def adminlogin(request):
-    if 'email' in request.session:
+    if 'admin' in request.session:
         return redirect('dashboard')
     else:
         if request.method == 'POST':
             email      =  request.POST.get('email')
             password        =  request.POST.get('password')
             user          =  authenticate(request,email=email,password = password)
-
             if user is not None and user.is_superuser:
                 login(request,user)
                 request.session['admin']=email
@@ -63,7 +59,6 @@ def adminlogin(request):
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache
 def dashboard(request):
-
     if 'admin' in request.session:
         return render(request,'dashboard.html')
     else:
@@ -81,9 +76,7 @@ def admin_logout(request):
 def customers(request):
     if 'admin' in request.session:    
         customer_list =  CustomUser.objects.filter(is_staff=False).order_by('id')
-
         paginator = Paginator(customer_list,10)  
-
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -100,8 +93,8 @@ def unblock_customer(request, customer_id):
         customer = CustomUser.objects.get(id=customer_id)
     except ObjectDoesNotExist:
         return redirect('customer')  
-    
-    customer.is_active = not customer.is_active
+    # toggles is set if is active is false it will be set to true and vice versa 
+    customer.is_active = not customer.is_active    
     customer.save()
 
     return redirect('customer')
@@ -121,8 +114,6 @@ def block_customer(request, customer_id):
 @never_cache
 def signup(request):
     if 'email'in request.session:
-        # a = request.session.get('email')
-        # print(a)
         return redirect('home') 
     elif request.method=='POST':
         name=request.POST['name']
@@ -203,8 +194,8 @@ def verify_signup(request):
             del request.session['email'] 
             del request.session['otp']
         
-            auth.login(request,user)
-            messages.success(request, "Signup successful!")
+            login(request,user)
+            messages.success(request, "Signup successfull!")
             return redirect('login')
         else:
             user.delete()
@@ -221,6 +212,8 @@ def generate_otp(length = 6):
     
 
 def user_login(request):
+    if 'email' in request.session:
+        return redirect('home')
     if request.method == "POST":
         email = request.POST.get('email')  # Use 'email' instead of 'username'
         password = request.POST.get('password')
@@ -235,6 +228,7 @@ def user_login(request):
             messages.error(request, 'Email and password are invalid!')
             return redirect('login')
     return render(request, 'login.html')
+
 
 def logout(request):
     if 'email' in request.session:
@@ -266,16 +260,9 @@ def category(request):
 def add_category(request):
     if 'admin' in request.session:
         if request.method  == 'POST':
-            # category_id         =request.POST.get('category_id')
+           
             category_name       =   request.POST.get('category_name')
-            # description         =   request.POST.get('description')
-            # image               =   request.FILES.get('image')
-            # offer_description   =   request.POST['offer_details']
-            # offer_price         =   request.POST['offer_price']
-
-
-            category = Category.objects.create(category_name = category_name)
-               
+            category = Category.objects.create(category_name = category_name)   
             category.save() 
 
             return redirect('category')  
@@ -296,12 +283,6 @@ def update_category(request, id):
         category_name = request.POST.get('category_name')
         if category_name:
             category.category_name           =  category_name
-        category.description                 =  request.POST.get('description')
-        # image                                =  request.FILES.get('image')
-        # category.category_offer_description  =  request.POST.get('offer_details')
-        # category.category_offer              =  request.POST.get('offer_price')
-        # if image:
-        #     category.image = image
         category.save()
         return redirect('category')
 
@@ -420,7 +401,6 @@ def update_sub_category(request, sub_category_id):
         sub_category.save()
 
         return redirect('sub_category')
-
     return render(request, 'edit_sub_category.html')
 
 
@@ -433,7 +413,7 @@ def delete_sub_category(request, sub_id):
     sub_category.delete()
 
     sub_category = Sub_category.objects.all()
-    context = {'categories': sub_category}
+   
 
     return redirect('sub_category')
 
@@ -476,8 +456,7 @@ def add_product(request):
             try:
                 subcategory_id = Sub_category.objects.get(id=subcategory_id )
                 main_category_id = subcategory_id.main_category_id
-                print(main_category_id,"..............main category")
-                # sub_name   = category.category_name
+              
             except Sub_category.DoesNotExist:
                 return HttpResponse("sub Category not found")
             
@@ -544,8 +523,7 @@ def update_product(request,product_id):
        
         for image in request.FILES.getlist('images'):
             im=Images.objects.create(product=product, images=image)
-            print(im)
-
+         
         return redirect('product') 
     else:
         context = {
@@ -593,7 +571,7 @@ def shop(request):
 
 
 @login_required
-@user_passes_test(lambda u: not u.is_staff, login_url='login')
+@user_passes_test(lambda u: not u.is_staff, login_url='login') 
 def profile(request):
     user=request.user
     context={
@@ -630,7 +608,6 @@ def address(request):
     return render(request,'address.html',context)
 
 def add_address(request):
-
     if request.method == 'POST':
         # Retrieve data from the POST request
         full_name = request.POST['full_name']
@@ -640,7 +617,9 @@ def add_address(request):
         street = request.POST['street']
         phone_no = request.POST['phone_no']
         city = request.POST['city']
+
        
+        
         # Create a new Address object and save it to the database
         address = Address(
             full_name=full_name,
@@ -736,7 +715,7 @@ def wishlist(request):
     return render(request, 'wishlist.html', context)
 
 
-def add_to_wishlist(request, id):
+def add_to_wishlist(request,id):
     try:
         product = Product.objects.get(id=id)
     except Product.DoesNotExist:
@@ -761,12 +740,9 @@ def remove_from_wishlist(request, wishlist_item_id):
     try:
         if request.user.is_authenticated:
             wishlist_item = Wishlist.objects.get(id=wishlist_item_id, user=request.user)
-        else:
-            wishlist_item = Wishlist.objects.get(id=wishlist_item_id)
         wishlist_item.delete()
     except Wishlist.DoesNotExist:
         pass
-    
     return redirect('wishlist')
 
 @never_cache
@@ -841,8 +817,6 @@ def update_cart(request, productId):
     cart_item = None
    
     cart_item = get_object_or_404(Cart, product_id=productId, user=request.user)
-    print(cart_item,"....................")
-    
     try:
         data = json.loads(request.body)
         quantity = int(data.get('quantity'))
@@ -911,7 +885,7 @@ def shipping_address(request):
 
         if not full_name or not house_no or not post_code or not state or not street or not phone_no or not city :
             messages.error(request, 'Please input all the details!!!')
-            return redirect('edit_profile')
+            return redirect('check_out')
         
         user = request.user
 
@@ -933,6 +907,7 @@ def shipping_address(request):
     
 @login_required
 def order_placed(request):
+
     user = request.user
     cart_items = Cart.objects.filter(user=user)
     subtotal=0
@@ -947,7 +922,7 @@ def order_placed(request):
     if request.method == 'POST':
         payment       =    request.POST.get('payment')
         address_id    =    request.POST.get('addressId')
-    print(address_id,"  ...................")
+   
     
     if not address_id:
         messages.info(request, 'Input Address!!!')
@@ -992,16 +967,6 @@ def success(request):
 
 # admin side order
 
-def admin_order_details(request,order_id):
-    order = get_object_or_404(Order, id=order_id)
-
-    context = {
-        'order': order,
-        
-    }
-
-    return render(request, 'admin_order_details.html', context)
-
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache     
 def order(request):
@@ -1012,7 +977,6 @@ def order(request):
         paginator = Paginator(orders, per_page=10) 
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        
         context = {
             'orders': page_obj,
         }
@@ -1036,8 +1000,6 @@ def updateorder(request):
         order.status = status
         order.save()   
         messages.success(request, 'Order status updated successfully.')
-
-        
 
         return redirect('order') 
 
@@ -1143,3 +1105,113 @@ def reset_password(request):
             return redirect('reset_password')
     else:
         return render(request, 'forgot_pass.html')
+    
+
+#variation
+def variations(request, product_id=None):
+    products = Product.objects.all()
+
+    if product_id:
+        product = get_object_or_404(Product, pk=product_id)
+        variations = ProductVariation.objects.filter(product=product)
+       
+    else:
+       
+        variations = ProductVariation.objects.all()
+
+    context = {
+        'products': products,
+        'variations': variations,
+        
+    }
+
+    return render(request, 'variation.html', context)
+
+
+def add_variation(request):
+        if 'admin' in request.session:
+            
+            if request.method == 'POST':
+                product_id=request.POST['product_id']
+                product = get_object_or_404(Product, id=product_id)
+
+                color = request.POST['color']
+                price = request.POST['price']
+                variation_images = request.FILES.getlist('images')
+                print(variation_images,"..............")
+
+                  
+                for img in variation_images:
+                    image_obj = Images.objects.create(product=product, images=img)
+                    image_id = image_obj.id
+
+                variation =  ProductVariation.objects.create(
+
+                    product=product,
+                    color=color,
+                    price=price,
+                    image_id = image_id
+
+                )        
+                return redirect('product') 
+            
+            products = Product.objects.all()
+
+            
+            context = {
+                'products': products,
+                
+    }
+            return render(request,'add_variation.html',context)
+        else:
+            return redirect('admin')
+        
+
+def delete_variation(request,variation_id):
+    try:
+        variations= ProductVariation.objects.get(id=variation_id)
+    except ProductVariation.DoesNotExist:
+        return render(request, 'category_not_found.html')
+
+    variations.delete()
+
+    return redirect('variations')
+def edit_variation(request,variation_id):
+    if 'admin' in request.session:
+        try:
+            variation =  ProductVariation.objects.get(id=variation_id)
+        except ProductVariation.DoesNotExist:
+            return HttpResponse('variation_not_found')
+        product = Product.objects.get(id=variation.product.id)  
+        images = Images.objects.filter(product=product) 
+       
+        
+        context = {
+            'product':product,
+            'variation': variation,
+            'images' :images,
+        }
+        return render(request, 'edit_variation.html', context)
+    else:
+        return redirect('admin')
+    
+def update_variation(request,variation_id):
+    variation =  ProductVariation.objects.get(id=variation_id)
+    image_id   = variation.image_id
+
+
+    if request.method == 'POST':
+        color = request.POST['color']
+        price = request.POST['price']
+       
+            
+        variation.color = color
+        variation.price = price
+        variation.save()
+        if 'multimage' in request.FILES:
+           for image_file in request.FILES.getlist('multimage'):
+                images = Images.objects.get(id = image_id)
+                images.product = variation.product
+                images.images  = image_file
+                images.save()
+        return redirect('variations')
