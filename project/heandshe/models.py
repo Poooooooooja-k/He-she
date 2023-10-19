@@ -28,15 +28,16 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name = models.CharField(max_length=30, blank=True)
-    name = models.CharField(max_length=30, blank=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
+    email       = models.EmailField(unique=True)
+    first_name  = models.CharField(max_length=30, blank=True)
+    last_name   = models.CharField(max_length=30, blank=True)
+    name        = models.CharField(max_length=30, blank=True)
+    is_active   = models.BooleanField(default=True)
+    is_staff    = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
     phone_number=models.CharField(max_length=15,blank=True)
+    wallet_bal= models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     objects = CustomUserManager()
     
@@ -76,16 +77,25 @@ class Sub_category(models.Model):
         return self.sub_category_name
 
 
+class Section(models.Model):
+    name=models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
 
 
 class Product(models.Model):
-    product_name = models.CharField(max_length=100)
-    description = models.CharField(max_length=1000, default='')
-    category     = models.ForeignKey(Category,on_delete=models.CASCADE , blank=True , null=True)
-    Sub_category   = models.ForeignKey(Sub_category,on_delete=models.CASCADE , null=True , blank=True)
-    stock = models.IntegerField(default=0)
-    price = models.IntegerField(default=0)
-    image = models.ImageField(upload_to='products/' , blank=True , null= True)
+    product_name    = models.CharField(max_length=100)
+    description     = models.CharField(max_length=1000, default='')
+    category        = models.ForeignKey(Category,on_delete=models.CASCADE , blank=True , null=True)
+    Sub_category    = models.ForeignKey(Sub_category,on_delete=models.CASCADE , null=True , blank=True)
+    stock           = models.IntegerField(default=0)
+    price           = models.IntegerField(default=0)
+    image           = models.ImageField(upload_to='products/' , blank=True , null= True)
+    section         =models.ForeignKey(Section,on_delete=models.CASCADE,blank=True,null=True)
+    color          =models.CharField(max_length=100,null=True,blank=True)
+
 
     def __iter__(self):
         yield self.id
@@ -96,6 +106,7 @@ class Images(models.Model):
 
 
 class Address(models.Model):
+    user      =models.ForeignKey(CustomUser,on_delete=models.CASCADE,null = True,blank=True)
     full_name =models.CharField(max_length=100)
     house_no  =models.CharField(max_length=100)
     post_code =models.CharField(max_length=20)
@@ -116,12 +127,25 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"Wishlist:{self.user.name}-{self.product}"
+
     
+# class ProductVariation(models.Model):
+#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+#     color   = models.CharField(max_length=50)
+#     Brand   =models.CharField(max_length=100,null=True,blank=True)
+#     price   = models.DecimalField(max_digits=10, decimal_places=2)
+#     image   =models.ForeignKey(Images,on_delete=models.CASCADE,null=True,blank=True)
+#     stock  =models.IntegerField(default=0)
+
+#     def __str__(self):
+#         return f"{self.product.product_name} - {self.size} - {self.color}"
+
 class Cart(models.Model):
     user           =     models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True,blank=True)
-    product        =     models.ForeignKey(Product,on_delete=models.CASCADE,null=True,blank=True)
+    product        =     models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
     quantity       =     models.IntegerField(default=0)
     image          =     models.ImageField(upload_to='products',null=True, blank=True )
+
     
     @property
     def sub_total(self):
@@ -141,6 +165,7 @@ class Order(models.Model):
         ('delivered','delivered'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
+        ('returned','returned'),
         ('refunded','refunded'),
         ('on_hold','on_hold')
 
@@ -160,8 +185,8 @@ class Order(models.Model):
         return f"Order #{self.pk} - {self.product}"
 
 class OrderItem(models.Model):
-    order          =   models.ForeignKey(Order,on_delete=models.CASCADE)
-    product        =   models.ForeignKey(Product,on_delete=models.CASCADE)
+    order          =   models.ForeignKey(Order,on_delete=models.CASCADE, null=True, blank=True)
+    product        = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
     quantity       =   models.IntegerField(default=1)
     image          =   models.ImageField(upload_to='products', null=True, blank=True)
 
@@ -169,20 +194,30 @@ class OrderItem(models.Model):
         return str(self.id)
     
 
-class ProductVariation(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    color = models.CharField(max_length=50)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    image=models.ForeignKey(Images,on_delete=models.CASCADE,null=True,blank=True)
+
+class Coupon(models.Model):
+    coupon_code     =  models.CharField(max_length=100,null=True,blank=True)
+    expired         =  models.BooleanField(default=False)
+    discount_price  =  models.PositiveIntegerField(default=100)
+    minimum_amount  =  models.PositiveIntegerField(default=500)
+    expiry_date     =  models.DateField(null=True,blank=True)
 
     def __str__(self):
-        return f"{self.product.product_name} - {self.size} - {self.color}"
+        return self.coupon_code
 
+class Wallet(models.Model):
+    user  =models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True,blank=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_credit = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status=models.CharField(max_length=20,blank=True)
 
-    
+    def _str_(self):
+        return f"{self.amount} {self.is_credit}"
 
-
-
+    def _iter_(self):
+        yield self.pk
 
 
 

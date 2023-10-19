@@ -130,6 +130,7 @@
                                 <tr class="text-dark">
                                     <th scope="col">Product</th>
                                     <th scope="col">Color</th>
+                                    <th scope="col">Stock</th>
                                     <th scope="col">Image</th>
                                     <th scope="col">Price</th>
                                     <th scope="col">Action</th>
@@ -143,6 +144,7 @@
                                 <tr>
                                     <td>{{ variation.product.product_name }}</td>
                                     <td>{{ variation.color }}</td>
+                                    <td>{{ variation.stock }}</td>
                                     <td>
                                        
                                         <img src="{{ variation.image.images.url }}" alt="Product Image" width="200" height="200">
@@ -196,7 +198,7 @@
                                    </div>
                                    <div class="modal-footer">
                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                       <form action="{% url 'delete_variation' variation_id=variation.id %}" method="post">
+                                       <form action="{% url 'delete_variation' id=variation.id %}" method="post">
                                         {% csrf_token %}
                                         <input type="submit" class="btn btn-danger" value="Delete">
                                     </form>

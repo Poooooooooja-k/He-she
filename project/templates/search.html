@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Untree.co">
+  <link rel="shortcut icon" href="favicon.png">
+
+  <meta name="description" content="" />
+  <meta name="keywords" content="bootstrap, bootstrap4" />
+
+		<!-- Bootstrap CSS -->
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+		<link href="css/tiny-slider.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet">
+		<title>search result</title>       
+	</head>
+
+<body>
+    <div class="container">
+        <h2>Search Results</h2>
+        <div class="row">
+            {% for product in  search_results %}
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <a class="product-item" href="{% url 'user_product' product.id %}">
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.product_name }}"  style="max-width: 200px; max-height: 200px;">
+                            <div class="card-body">
+                                <h5 class="card-title" style="color: black;">{{ product.product_name }}</h5>
+                                    <p class="card-text" style="color: black;">{{ product.description }}</p>
+                                    <p class="card-text" style="color: black;">Price: {{ product.price }}</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}    

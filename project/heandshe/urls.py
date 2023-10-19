@@ -69,7 +69,8 @@ urlpatterns=[
     
 
     # cart
-    path('cart/',views.cart,name='cart'),
+    # path('cart/',views.cart,name='cart'),
+    path('cartt/',views.cartt,name='cartt'),
     path('remove_from_cart/<int:id>/', views.remove_from_cart, name='remove_from_cart'),
     path('update-cart/<int:productId>/', views.update_cart, name='update_cart'),
     path('add_to_cart/<int:id>/', views.add_to_cart, name='add_to_cart'),
@@ -84,26 +85,63 @@ urlpatterns=[
 
     # admin order
     path('order/',views.order,name = 'order'),
-    path('update_order/', views.updateorder, name='update_order'),
+    path('update_order/', views.updateorder,name='update_order'),
 
 
     # costumer
     path('order_details/<int:id>',views.order_details,name='order_details'),
-    path('cancel-order/<int:id>/', views.cancel_order, name='cancel_order'),
-    path('customer_order/',views.customer_order,name = 'customer_order'),
+    path('cancel-order/<int:id>/', views.cancel_order,name='cancel_order'),
+    path('return_order/<int:id>/', views.return_order, name='return_order'),
+    path('customer_order/',views.customer_order,name='customer_order'),
 
     # forgot password
-    path('forgot_password/', views.forgot_password, name='forgot_password'),
-    path('reset_password/', views.reset_password, name='reset_password'),
+    path('forgot_password/', views.forgot_password,name='forgot_password'),
+    path('reset_password/', views.reset_password,name='reset_password'),
 
 
     # variation
-    path('variations/',views.variations,name='variations'),
-    path('variations/<int:product_id>/',views.variations,name='variations'),
-    path('delete_variation/<int:variation_id>/', views.delete_variation, name='delete_variation'),
-    path('edit_variation/<int:variation_id>/',views.edit_variation,name='edit_variations' ),
-    path('update_variations/<int:variation_id>/',views.update_variation,name='update_variation'),
-    path('add_variations/',views.add_variation,name='add_variation'),
+    # path('variations/',views.variations,name='variations'),
+    # path('variations/<int:product_id>/',views.variations,name='variations'),
+    # path('delete_variation/<int:id>/', views.delete_variation, name='delete_variation'),
+    # path('edit_variation/<int:id>/',views.edit_variation,name='edit_variations' ),
+    # path('update_variations/<int:id>/',views.update_variation,name='update_variation'),
+    # path('add_variations/',views.add_variation,name='add_variation'),
+    # path('display_variations/',views.display_variations,name='display_variations'),
+
+
+   #section
+    path('section/',views.section, name = 'section'),
+    path('add_section/',views.add_section,name= 'add_section'),
+    path('update_section/<int:id>/update_section/', views.update_section, name='update_section'),
+    path('delete_section/<int:section_id>/delete/', views.delete_section, name='delete_section'),
+    path('edit_section/<int:section_id>/edit/', views.edit_section, name='edit_section'),
+
+    #men
+    path('mens/',views.mens_watches,name='mens'),
+    #women
+    path('womens/',views.womens_watches,name='womens'),
+    path('contact/',views.contact,name='contact'),
+
+    #coupon
+    path('coupon/',views.coupon,name ='coupon'),
+    path('add_coupon/',views.add_coupon,name='add_coupon'),
+    path('apply_coupon/', views.apply_coupon, name='apply_coupon'),
+    path('update_coupon/<int:id>/',views.update_coupon, name='update_coupon'),
+    path('edit_coupon/<int:id>/', views.edit_coupon, name='edit_coupon'),
+    path('delete_coupon/<int:id>/',views.delete_coupon, name='delete_coupon'),
+
+    # search
+    path('search/',views.search,name='search'),
+    # admin_search
+    path('admin_search/',views.admin_search,name='admin_search'),
+   
+
+   #razorpay
+    path('proceed-to-pay',views.proceed_to_pay,name='proceed_to_pay'),
+    path('razorpay/<int:address_id>/',views.razor_pay,name='razorpay'),
+
+    # wallet
+    path('wallet/',views.wallet,name='wallet'),
 
 ]
 if settings.DEBUG:

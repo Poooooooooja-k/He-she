@@ -91,11 +91,11 @@
                             <div class="modal-body">					
                                 <div class="form-group">
                                     <label>Name</label>
-                                    <input name="product_name" type="text" class="form-control" value="{{ product.product_name }}"  required>
+                                    <input name="product_name" type="text" class="form-control" value="{{ product.product_name }}" >
                                 </div>
                                 <div class="form-group">
                                     <label>Description</label>
-                                    <input name="description" type="text" class="form-control"  value= "{{ product.description }}" required>
+                                    <input name="description" type="text" class="form-control"  value= "{{ product.description }}" >
                                 </div>
                                 <div class="form-group">
                                     <label>Category</label>
@@ -124,33 +124,42 @@
                                     {% endfor %}
                                     </select>
                                 </div>
-
-
+                                <div class="form-group">
+                                    <label>Section</label>
+                                    <select name="section" class="form-control" required>
+                                        <option value="" selected disabled>Select a Section</option>
+                                        {% for section in sections %}
+                                            <option value="{{ section.name }}">{{ section.name }}</option>
+                                            
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>color</label>
+                                    <input name="color" type="text" class="form-control" value="{{ product.color }}">
+                                </div>
+                                
                                 <div class="form-group">
                                     <label>stock</label>
-                                    <input name="stock" type="number" class="form-control" value="{{ product.stock }}" required min="0">
+                                    <input name="stock" type="number" class="form-control" value="{{ product.stock }}">
                                 </div>
                                 
                                 <div class="form-group">
                                     <label>Price</label>
-                                    <input name="price" type="number" class="form-control" value="{{ product.price }}" required min="0">
+                                    <input name="price" type="number" class="form-control" value="{{ product.price }}" >
                                 </div>
 
                                 <div class="form-group">
                                     <label>Image</label>
-                                    <input name="image" type="file" class="form-control" value="{{ product.image }}" required min="0">
+                                    <input name="image" type="file" class="form-control" value="{{ product.image }}" >
                                     <!-- {% if product.image %}
                                         <img src="{{ product.image.url }}" alt="Current Image" style="max-width: 200px;">
                                     {% else %}
                                         <p>No image available</p>
                                     {% endif %} -->
                                 </div>
-                                
-                                <!-- <div class="form-group">
-                                    <label>New Image</label>
-                                    <input name="image" type="file" class="form-control">
-                                </div> -->
-                            
+                               
                             <div class="modal-footer">
                                 <a href="{% url 'product' %}"><input type="button" class="btn btn-default" data-dismiss="" value="Cancel"></a>
                                 <input type="submit" class="btn btn-success" value="Update">

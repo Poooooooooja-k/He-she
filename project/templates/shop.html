@@ -23,21 +23,92 @@
 
 <body>
 <div class="untree_co-section product-section before-footer-section">
-    <div class="container">
-          <div class="row">
-            {% for prod in product %}
-		      		<!-- Start Column 1 -->
-					<div class="col-12 col-md-4 col-lg-3 mb-5">
-						<a class="product-item" href="/product_details/{{prod.id}}">
-                            <img src="{{ prod.image.url }}" class="img-fluid product-thumbnail" style="max-width: 200px; max-height: 200px;" >
-							<h3 class="product-title">{{prod.product_name}}</h3>
-                            <p class="product-description">{{prod.description}}</p>
-							<strong class="product-price">{{prod.price}}</strong>
+<div class="container">
+	<form method="get" action="{% url 'shop' %}">
+	<div class="row">
+	  <!-- Filter Options (Left Sidebar) -->
+	  <div class="col-12 col-md-3">
+		<h4>Filter Options</h4>
+					<!-- Brand Filter -->
+					<div class="form-group">
+						<label for="brand">Brand:</label>
+						<select name="brand" id="brand" class="form-control">
+							<option value="" selected disabled>Select a brand</option>
+							{% for brand in brands %}
+								<option value="{{ brand }}">{{ brand }}</option>
+							{% endfor %}
+						</select>
+					</div>
 
-						 </a> 
-                                                
-                    </div>
-			{% endfor %}
+				<!-- Color Filter -->
+				<div class="form-group">
+				<label for="color">Color:</label>
+				<select name="color" id="color" class="form-control">
+					<option value="">All Colors</option>
+					{% for color in unique_colors %}
+					<option value="{{ color.color }}">{{ color.color }}</option>
+					{% endfor %}
+				</select>
+				</div>
+
+				
+                <!-- Subcategory Filter -->
+                <div class="form-group">
+					<label for="sub_category">category:</label>
+					<select name="sub_category" id="sub_category" class="form-control">
+						<option value="" selected disabled>Select a category</option>
+						{% for subcategory in subcategories %}
+							<option value="{{ subcategory.sub_category_name }}">{{ subcategory.sub_category_name }}</option>
+						{% endfor %}
+					</select>
+				</div>
+
+		<!-- Price Range Filter -->
+		<div class="form-group">
+			<label for="price">Price Range:</label>
+			<select name="price" id="price" class="form-control">
+			<option value="">All Prices</option>
+			<option value="price1">Below 500</option>
+			<option value="price2">500-1000</option>
+			<option value="price3">1000-5000</option>
+			<option value="price4">5000-10,000</option>
+			<option value="price5">10,000-25,000</option>
+			<option value="price6">25,000-50,000</option>
+			<option value="price7">Above 50,000</option>
+			<!-- Add more price options here -->
+		  </select>
+		</div>
+  
+		<button type="submit" class="btn btn-primary">Apply</button>
+	  </div>
+	</form>
+
+	
+	  <!-- Product Listings (Right Side) -->
+	  <div class="col-12 col-md-9">
+		<div class="row">
+		{% if products %}
+            {% for prod in products %}
+            <!-- Start Column 1 -->
+            <div class="col-12 col-md-4 col-lg-3 mb-5">
+              <a class="product-item" href="/product_details/{{prod.id}}">
+                <img src="{{ prod.image.url }}" class="img-fluid product-thumbnail" style="max-width: 200px; max-height: 200px;">
+                <h3 class="product-title">{{prod.product_name}}</h3>
+                <p class="product-description">{{prod.description}}</p>
+                <strong class="product-price">{{prod.price}}</strong>
+              </a>
+            </div>
+          {% endfor %} 
+        {% else %}
+              <div class="col-12">
+                  <h5>No products available.</h5>
+              </div>
+        {% endif %}
+	  </div>
+	</div>
+  </div>
+</div>
+</div>
+</body>
 {% endblock %}
-
-
+  

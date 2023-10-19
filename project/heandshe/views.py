@@ -26,17 +26,26 @@ from django.contrib.auth.models import User,auth
 from django.contrib.auth import authenticate,login
 from django.http import JsonResponse
 import json
-
-
+from django.db.models import Count
+from decimal import Decimal
 # Create your views here.
 
 def base(request):
     return render(request,'base.html')
-
 def home(request):
-    if 'admin' in request.session:
-        return redirect('dashboard')
-    return render(request,'home.html')
+    if 'email' in request.session:
+        return redirect('home')
+    section=Section.objects.filter(id= 4).first()
+    product=Product.objects.filter(section_id=4)
+
+    print(product,"....")
+    # product=Product.objects.filter(category__category_name='category')
+    
+    context={
+        'section' :section,
+        'products':product,
+    }
+    return render(request, 'home.html',context)
 
 def adminlogin(request):
     if 'admin' in request.session:
@@ -438,50 +447,58 @@ def product(request):
     else:
         return redirect('admin')
 
-
-@cache_control(no_cache=True,must_revalidate=True,no_store=True)
-@never_cache  
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@never_cache
 def add_product(request):
     categories = Category.objects.all()
+    sections = Section.objects.all()
+    
     if 'admin' in request.session:
         if request.method == 'POST':
-            product_name   =  request.POST.get('product_name')
-            description    =  request.POST.get('description')
-            subcategory_id =    request.POST.get('subcategory_id')
-            stock          =  request.POST.get('stock')
-            price          =  request.POST.get('price')
-            image          =  request.FILES.get('image') 
-            
-        
+            product_name = request.POST.get('product_name')
+            description = request.POST.get('description')
+            subcategory_id = request.POST.get('subcategory_id')
+            section_name = request.POST.get('section')  # Get the section name
+            color=request.POST.get('color')
+            stock = request.POST.get('stock')
+            price = request.POST.get('price')
+            image = request.FILES.get('image')
+
             try:
-                subcategory_id = Sub_category.objects.get(id=subcategory_id )
-                main_category_id = subcategory_id.main_category_id
+                subcategory = Sub_category.objects.get(id=subcategory_id)
+                main_category = subcategory.main_category
+
+                # Fetch the Section instance based on the section name
+                section = Section.objects.get(name=section_name)
+
+                product = Product.objects.create(
+                    product_name=product_name,
+                    description=description,
+                    Sub_category=subcategory,
+                    category=main_category,
+                    section=section,  # Assign the Section instance
+                    color=color,
+                    stock=stock,
+                    price=price,
+                    image=image,
+                )
               
-            except Sub_category.DoesNotExist:
-                return HttpResponse("sub Category not found")
-            
-            product = Product.objects.create(
-               product_name = product_name,
-               description = description,
-               Sub_category= subcategory_id,
-               category_id    = main_category_id,
-               stock = stock,
-               price = price,
-               image = image,
-               
 
-            )
-          
-            for image in request.FILES.getlist('image'):
-                Images.objects.create(product = product,images=image)
+                for image in request.FILES.getlist('image'):
+                    Images.objects.create(product=product, images=image)
 
-            return redirect('product')
+                return redirect('product')
 
-        context = {'categories': categories}
+            except (Sub_category.DoesNotExist, Section.DoesNotExist):
+                return HttpResponse("Sub Category or Section not found")
+           
+      
+   
+        context = {'categories': categories, 'sections': sections,}
         return render(request, 'add_product.html', context)
     else:
         return redirect('admin')
-    
+
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache  
@@ -494,42 +511,54 @@ def edit_product(request, product_id):
             return render(request, 'product_not_found.html')
         
         categories = Category.objects.all()
+        sections=Section.objects.all()
         context = {
             'product'    : product,
             'categories' : categories,
+            'sections'   :sections,
         }
 
         return render(request, 'edit_product.html', context)
     else:
         return redirect('admin')
-    
-@cache_control(no_cache=True,must_revalidate=True,no_store=True)
-@never_cache  
-def update_product(request,product_id):
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@never_cache
+def update_product(request, product_id):
     product = Product.objects.get(id=product_id)
+
     if request.method == 'POST':
-        product.product_name    =   request.POST.get('product_name')
-        product.description     =   request.POST.get('description')
-        category_name           =   request.POST.get('category')
-        category                =   Category.objects.get(category_name=category_name)
-        product.category        =   category
-        product.stock           =   request.POST.get('stock')
-        product.price           =   request.POST.get('price')
-        image                   =   request.FILES.get('image')
-        
+        product.product_name = request.POST.get('product_name')
+        product.description = request.POST.get('description')
+        category_name = request.POST.get('category')
+        category = Category.objects.get(category_name=category_name)
+        product.category = category
+
+        # Fetch the Section instance based on the section name
+        section_name = request.POST.get('section')
+        try:
+            section = Section.objects.get(name=section_name)
+            product.section = section
+        except Section.DoesNotExist:
+            # Handle the case where the section does not exist
+            return HttpResponse("Section not found")
+        product.color = request.POST.get('color')
+        product.stock = request.POST.get('stock')
+        product.price = request.POST.get('price')
+        image = request.FILES.get('image')
+
         if image:
             product.image = image
         product.save()
-       
+
         for image in request.FILES.getlist('images'):
-            im=Images.objects.create(product=product, images=image)
-         
-        return redirect('product') 
+            im = Images.objects.create(product=product, images=image)
+
+        return redirect('product')
     else:
         context = {
-            'product': product
+            'product': product,
         }
-    return render(request, 'product.html', context)
+        return render(request, 'product.html', context)
 
 
 
@@ -556,19 +585,61 @@ def userproductpage(request,id):
 
     return render(request, 'product_details.html', context)
 
-
 def shop(request):
-    product=Product.objects.all()
+    # Get all products and unique colors
+    all_products = Product.objects.all()
+    unique_colors = Product.objects.values('color').annotate(count=Count('color')).order_by('color')
+    brands = Product.objects.values_list('product_name', flat=True).distinct()
    
-    # product=Product.objects.filter(category__category_name='category')
-    print(product)
-    context={
-        'product':product,
+
+    # Filter products based on brand, color, and price
+    selected_brand = request.GET.get('brand')
+    selected_color = request.GET.get('color')
+    selected_price = request.GET.get('price')
+    selected_subcategory = request.GET.get('sub_category')
+
+    # Start with all products and filter based on selected options
+    products = all_products
+
+    if selected_brand:
+        products = products.filter(product_name=selected_brand)  # Use 'product_name' for brand filtering
+
+    if selected_color:
+        products = products.filter(color=selected_color)
+
+    
+    if selected_subcategory:
+        # Filter for products with the selected subcategory
+       products = products.filter(Sub_category__sub_category_name=selected_subcategory)
+
+    if selected_price:
+        # Define price ranges based on selected_price
+        price_ranges = {
+        
+            "price1": (0, 500),
+            "price2": (500, 1000),
+            "price3": (1000, 5000),
+            "price4": (5000, 10000),
+            "price5": (10000, 25000),
+            "price6": (25000, 50000),
+            "price7": (50000, 1000000)  
+        }
+        
+
+        if selected_price in price_ranges:
+            price_range = price_ranges[selected_price]
+            # Filter for products with prices within the selected price range
+            products = products.filter(price__range=price_range)
+    
+    subcategories = Sub_category.objects.values('sub_category_name').distinct()
+    context = {
+        'all_products': all_products,
+        'products': products,
+        'unique_colors': unique_colors,
+        'brands': brands,  
+        'subcategories':  subcategories,
     }
-    return render(request, 'shop.html',context)
-
-
-
+    return render(request, 'shop.html', context)
 
 @login_required
 @user_passes_test(lambda u: not u.is_staff, login_url='login') 
@@ -601,9 +672,11 @@ def update_profile(request):
 
 
 def address(request):
-    address=Address.objects.all()
+    # Assuming you have a foreign key from Address to the User model
+    user = request.user
+    addresses = Address.objects.filter(user=user)
     context={
-        'address':address,
+        'addresses':addresses,
     }
     return render(request,'address.html',context)
 
@@ -621,7 +694,9 @@ def add_address(request):
        
         
         # Create a new Address object and save it to the database
+        user=request.user
         address = Address(
+            user=user,
             full_name=full_name,
             house_no=house_no,
             post_code=post_code,
@@ -689,7 +764,7 @@ def changepassword(request):
             if new_password == confirm_password:
                 customer.set_password(new_password)
                 customer.save()
-                messages.success(request, 'Password changed successfully.')
+                # messages.success(request, 'Password changed successfully.')
                 return redirect('home')
             else:
                 messages.error(request, 'New password and confirm password do not match.')
@@ -747,7 +822,9 @@ def remove_from_wishlist(request, wishlist_item_id):
 
 @never_cache
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
-def cart(request):
+def cartt(request):
+    if 'discount' in request.session:
+        del request.session['discount']
     user = request.user
     cart_items = Cart.objects.filter(user=user).order_by('id')
 
@@ -783,7 +860,7 @@ def cart(request):
     }
 
 
-    return render(request, 'cart.html', context)
+    return render(request, 'cartt.html', context)
 
 
 
@@ -808,7 +885,7 @@ def add_to_cart(request, id):
             cart_item.quantity += int(quantity)
         cart_item.save()
 
-    return redirect('cart')
+    return redirect('cartt')
 
 
 
@@ -842,8 +919,7 @@ def remove_from_cart(request,id):
     except Cart.DoesNotExist:
         pass
     
-    return redirect('cart')
-
+    return redirect('cartt')
 
 @never_cache
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -852,21 +928,31 @@ def check_out(request):
     user = request.user
     cart_items = Cart.objects.filter(user=user)
     subtotal = 0
+
     for cart_item in cart_items:
         itemprice = (cart_item.product.price) * (cart_item.quantity)
-        subtotal = subtotal + itemprice
+        subtotal += itemprice  # Update subtotal inside the loop
+
     shipping_cost = 10 
-    total = subtotal + shipping_cost if subtotal else 0
-    address = Address.objects.all()
+   
+    discount = request.session.get('discount', 0)
+    if discount:
+        total = subtotal + shipping_cost - discount if subtotal else 0
+        
+    else:
+        total = subtotal + shipping_cost if subtotal else 0
+
+    address = Address.objects.filter(user=user)
 
     context = {
         'cart_items': cart_items,
         'subtotal': subtotal,
+        'discount_amount': discount,
         'total': total,
         'address': address,
-        'itemprice': itemprice
     }
     return render(request, 'check_out.html', context)
+
 
 
 def shipping_address(request):
@@ -907,7 +993,6 @@ def shipping_address(request):
     
 @login_required
 def order_placed(request):
-
     user = request.user
     cart_items = Cart.objects.filter(user=user)
     subtotal=0
@@ -916,6 +1001,7 @@ def order_placed(request):
         subtotal=subtotal+itemprice
     shipping_cost = 10 
     total = subtotal + shipping_cost if subtotal else 0
+    discount = request.session.get('discount', 0)
     
     
 
@@ -927,6 +1013,8 @@ def order_placed(request):
     if not address_id:
         messages.info(request, 'Input Address!!!')
         return redirect('check_out')
+    if discount:
+        total -= discount
     
 
     address = Address.objects.get(id=request.POST.get('addressId'))
@@ -961,10 +1049,16 @@ def success(request):
 
     }
     return render(request,'order_placed.html',context)
-   
 
 
+def restock_products(order):
+    order_items = OrderItem.objects.filter(order=order)
+    for order_item in order_items:
+        product = order_item.product
+        product.stock += order_item.quantity
+        product.save()
 
+        
 # admin side order
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
@@ -996,7 +1090,6 @@ def updateorder(request):
         except Order.DoesNotExist:
             return redirect('order')  
 
-      
         order.status = status
         order.save()   
         messages.success(request, 'Order status updated successfully.')
@@ -1031,11 +1124,47 @@ def order_details(request,id):
         }
     return render(request,'order_details.html',context)
 
+def cancel_order(request, id):
+    user=request.user
+    usercustm=CustomUser.objects.get(email=user)
+    order = Order.objects.get(id=id)
 
-def cancel_order(request,id):
-    OrderItem=Order.objects.get(id=id)
-    OrderItem.status='cancelled'
-    OrderItem.save()
+    if  order.status == 'completed' and  order.payment_type=='cod':
+        wallet= Wallet.objects.create(
+        user=user,
+        order= order,
+        amount= order.amount,
+        status='Credited',
+        )
+        wallet.save()
+        order.status='cancelled'
+        order.save()
+        Order_item_amount = Decimal(order.amount)
+        usercustm.wallet_bal+=Order_item_amount
+        usercustm.save()
+
+
+    elif  order.payment_type=='razorpay':
+        wallet= Wallet.objects.create(
+        user=user,
+        order= order,
+        amount= order.amount,
+        status='Credited',
+        )
+        wallet.save()
+        
+        order.status='cancelled'
+        order.save()
+        Order_item_amount = Decimal(order.amount)
+        usercustm.wallet_bal+=Order_item_amount
+        print('wallte:',usercustm.wallet_bal)
+        usercustm.save()
+
+    
+    restock_products(order)
+    order.status = 'cancelled'
+    order.save()
+
     return redirect('order_details',id)
 
 
@@ -1107,111 +1236,606 @@ def reset_password(request):
         return render(request, 'forgot_pass.html')
     
 
-#variation
-def variations(request, product_id=None):
-    products = Product.objects.all()
+# # #variation
+# def variations(request, product_id=None):
+#     products = Product.objects.all()
 
-    if product_id:
-        product = get_object_or_404(Product, pk=product_id)
-        variations = ProductVariation.objects.filter(product=product)
+#     if product_id:
+#         product = get_object_or_404(Product, pk=product_id)
+#         variations = ProductVariation.objects.filter(product=product)
        
-    else:
+#     else:
        
-        variations = ProductVariation.objects.all()
+#         variations = ProductVariation.objects.all()
 
-    context = {
-        'products': products,
-        'variations': variations,
+#     context = {
+#         'products': products,
+#         'variations': variations,
         
-    }
+#     }
 
-    return render(request, 'variation.html', context)
+#     return render(request, 'variation.html', context)
 
 
-def add_variation(request):
-        if 'admin' in request.session:
+# def add_variation(request):
+#         if 'admin' in request.session:
             
-            if request.method == 'POST':
-                product_id=request.POST['product_id']
-                product = get_object_or_404(Product, id=product_id)
+#             if request.method == 'POST':
+#                 product_id=request.POST['product_id']
+#                 product = get_object_or_404(Product, id=product_id)
 
-                color = request.POST['color']
-                price = request.POST['price']
-                variation_images = request.FILES.getlist('images')
-                print(variation_images,"..............")
+#                 color = request.POST['color']
+#                 stock = request.POST['stock']
+#                 price = request.POST['price']
+#                 variation_images = request.FILES.getlist('images')
+#                 print(variation_images,"..............")
 
                   
-                for img in variation_images:
-                    image_obj = Images.objects.create(product=product, images=img)
-                    image_id = image_obj.id
+#                 for img in variation_images:
+#                     image_obj = Images.objects.create(product=product, images=img)
+#                     image_id = image_obj.id
 
-                variation =  ProductVariation.objects.create(
+#                 variation =  ProductVariation.objects.create(
 
-                    product=product,
-                    color=color,
-                    price=price,
-                    image_id = image_id
+#                     product=product,
+#                     color=color,
+#                     stock=stock,
+#                     price=price,
+#                     image_id = image_id
 
-                )        
-                return redirect('product') 
+#                 )        
+#                 return redirect('product') 
             
-            products = Product.objects.all()
+#             products = Product.objects.all()
 
             
-            context = {
-                'products': products,
+#             context = {
+#                 'products': products,
+              
                 
-    }
-            return render(request,'add_variation.html',context)
-        else:
-            return redirect('admin')
+#     }
+#             return render(request,'add_variation.html',context)
+#         else:
+#             return redirect('admin')
         
 
-def delete_variation(request,variation_id):
-    try:
-        variations= ProductVariation.objects.get(id=variation_id)
-    except ProductVariation.DoesNotExist:
-        return render(request, 'category_not_found.html')
+# def delete_variation(request,variation_id):
+#     try:
+#         variations= ProductVariation.objects.get(id=variation_id)
+#     except ProductVariation.DoesNotExist:
+#         return render(request, 'category_not_found.html')
 
-    variations.delete()
+#     variations.delete()
 
-    return redirect('variations')
-def edit_variation(request,variation_id):
-    if 'admin' in request.session:
-        try:
-            variation =  ProductVariation.objects.get(id=variation_id)
-        except ProductVariation.DoesNotExist:
-            return HttpResponse('variation_not_found')
-        product = Product.objects.get(id=variation.product.id)  
-        images = Images.objects.filter(product=product) 
+#     return redirect('variations')
+
+
+# def edit_variation(request,id):
+#     if 'admin' in request.session:
+#         try:
+#             variation =  ProductVariation.objects.get(id=id)
+#         except ProductVariation.DoesNotExist:
+#             return HttpResponse('variation_not_found')
+      
+#         context = {
+           
+#             'variation': variation,
+            
+#         }
+#         return render(request, 'edit_variation.html', context)
+#     else:
+#         return redirect('admin')
+    
+# def update_variation(request,id):
+#     variation =  ProductVariation.objects.get(id=id)
+#     image_id   = variation.image_id
+
+
+#     if request.method == 'POST':
+#         color = request.POST['color']
+#         stock = request.POST['stock']
+#         price = request.POST['price']
        
+            
+#         variation.color = color
+#         riation.color = color
+#         variation.price = price
+#         variation.save()
+#         if 'multimage' in request.FILES:
+#            for image_file in request.FILES.getlist('multimage'):
+#                 images = Images.objects.get(id = image_id)
+#                 images.product = variation.product
+#                 images.images  = image_file
+#                 images.save()
+#         return redirect('variations')
+    
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+@never_cache  
+def section(request):
+    if 'admin' in request.session:
+        sections = Section.objects.all().order_by('id')
+        
+        
+        paginator = Paginator(sections, per_page=3)  
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
         
         context = {
-            'product':product,
-            'variation': variation,
-            'images' :images,
+            'sections': page_obj,
         }
-        return render(request, 'edit_variation.html', context)
+        return render(request, 'section.html', context)
     else:
         return redirect('admin')
-    
-def update_variation(request,variation_id):
-    variation =  ProductVariation.objects.get(id=variation_id)
-    image_id   = variation.image_id
 
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+@never_cache          
+def add_section(request):
+    if 'admin' in request.session:
+        if request.method  == 'POST':
+            name   =   request.POST['name']
+            section = Section.objects.create(
+             name  =  name,           
+            )
+            section.save() 
+            return redirect('section')  
+        return render(request, 'add_section.html') 
+    else:
+        return redirect ('admin')
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+@never_cache  
+def edit_section(request, section_id):
+    if 'admin' in request.session:
+        try:
+            section = Section.objects.get(id=section_id)
+        except Section.DoesNotExist:
+            return HttpResponse("section doesnot exist")
+
+        context = {'section': section}
+        return render(request, 'edit_section.html', context)
+    else:
+        return redirect ('admin')
+
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+@never_cache  
+def update_section(request, id):
+    try:
+        section = Section.objects.get(id=id)
+    except Section.DoesNotExist:
+        return render(request, 'category_not_found.html')
 
     if request.method == 'POST':
-        color = request.POST['color']
-        price = request.POST['price']
+        name = request.POST.get('name')
+        if name:
+            section.name = name
+        
+        section.save()
+        return redirect('section')
+
+    context = {'section': section}
+    return render(request, 'edit_section.html', context)
+
+
+
+
+def delete_section(request,section_id):
+    try:
+        section = Section.objects.get(id=section_id)
+    except Category.DoesNotExist:
+        return render(request, 'category_not_found.html')
+
+    section.delete()
+
+    sections = Section.objects.all()
+    context = {'sections': section}
+
+    return redirect('section')
+
+
+
+def mens_watches(request):
+
+    mens_watches_category = Category.objects.get(category_name="Men's watch")
+    unique_colors = Product.objects.values('color').annotate(count=Count('color')).order_by('color')
+    # Filter products that belong to this category
+    mens_watches_products = Product.objects.filter(category=mens_watches_category)
+
+    selected_brand = request.GET.get('brand')
+    selected_color = request.GET.get('color')
+    selected_price = request.GET.get('price')
+    selected_subcategory = request.GET.get('sub_category')
+
+    if selected_brand:
+        mens_watches_products = mens_watches_products.filter(product_name=selected_brand)
+
+    if selected_color:
+        mens_watches_products = mens_watches_products.filter(color=selected_color)
+
+    
+    if selected_subcategory:
+        # Filter for products with the selected subcategory
+     mens_watches_products = mens_watches_products.filter(Sub_category__sub_category_name=selected_subcategory)
+
+
+
+    if selected_price:
+    
+        price_ranges = {
+            "price1": (0, 500),
+            "price2": (500, 1000),
+            "price3": (1000, 5000),
+            "price4": (5000, 10000),
+            "price5": (10000, 25000),
+            "price6": (25000, 50000),
+            "price7": (50000, 1000000) 
+        }
+
+        if selected_price in price_ranges:
+            price_range = price_ranges[selected_price]
+            # Filter for products with prices within the selected price range
+            mens_watches_products=  mens_watches_products.filter(price__range=price_range)
+    products = Product.objects.values('product_name').distinct()
+    subcategories = Sub_category.objects.values('sub_category_name').distinct()
+
+    context= {'mens_watches_products': mens_watches_products,
+               'products': products,
+                'unique_colors':  unique_colors,
+                 'subcategories': subcategories
+                }
+
+    return render(request, 'mens.html',context)
+
+def womens_watches(request):
+    womens_watches_category = Category.objects.get(category_name="womens watch")
+    womens_watches_products = Product.objects.filter(category=womens_watches_category)
+
+    selected_brand = request.GET.get('brand')
+    selected_color = request.GET.get('color')
+    selected_price = request.GET.get('price')
+    selected_subcategory = request.GET.get('sub_category')
+
+    if selected_brand:
+        womens_watches_products = womens_watches_products.filter(product_name=selected_brand)
+
+    if selected_color:
+        womens_watches_products = womens_watches_products.filter(color=selected_color)
+
+    
+    if selected_subcategory:
+        # Filter for products with the selected subcategory
+     womens_watches_products = womens_watches_products.filter(Sub_category__sub_category_name=selected_subcategory)
+
+    if selected_price:
        
+        price_ranges = {
+            "price1": (0, 500),
+            "price2": (500, 1000),
+            "price3": (1000, 5000),
+            "price4": (5000, 10000),
+            "price5": (10000, 25000),
+            "price6": (25000, 50000),
+            "price7": (50000, 1000000) 
+        }
+
+
+
+        if selected_price in price_ranges:
+            price_range = price_ranges[selected_price]
+            # Filter for products with prices within the selected price range
+            womens_watches_products = womens_watches_products.filter(price__range=price_range)
+
+    unique_colors = Product.objects.values('color').annotate(count=Count('color')).order_by('color')
+    products = Product.objects.values('product_name').distinct()
+    subcategories = Sub_category.objects.values('sub_category_name').distinct()
+
+
+    context = {
+        'womens_watches_products': womens_watches_products,
+        'products': products,
+        'unique_colors': unique_colors,
+        'subcategories': subcategories,
+    }
+    return render(request, 'womens.html', context)
+
+def contact(request):
+    return render(request,'contact.html')
+
+
+
+#coupon
+@never_cache
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def coupon(request):
+    if 'admin' in request.session:
+        coupons = Coupon.objects.all().order_by('id')
+        context = {'coupons': coupons}
+        return render(request, 'coupon.html', context)
+    else:
+        return redirect('admin')
+
+
+def add_coupon(request):
+    if request.method == 'POST':
+        coupon_code    = request.POST.get('Couponcode')
+        discount_price  = request.POST.get('dprice')
+        minimum_amount = request.POST.get('amount')
+        expiry_date=request.POST.get('date')
+        
+        coupon = Coupon(coupon_code=coupon_code, discount_price=discount_price, minimum_amount=minimum_amount,expiry_date=expiry_date)
+        coupon.save()
+
+        return redirect('coupon')
+    
+
+def apply_coupon(request):
+    if request.method == 'POST':
+        coupon_code = request.POST.get('coupon_code')
+
+        try:
+            coupon = Coupon.objects.get(coupon_code=coupon_code)
+        except Coupon.DoesNotExist:
+            messages.error(request, 'Invalid coupon code')
+            return redirect('check_out')
+
+        user = request.user
+        cart_items = Cart.objects.filter(user=user)
+        subtotal = 0
+        shipping_cost = 10
+        total_dict = {}
+        coupons = Coupon.objects.all()
+
+        for cart_item in cart_items:
+            if cart_item.quantity > cart_item.product.stock:
+                messages.warning(request, f"{cart_item.product.product_name} is out of stock.")
+                cart_item.quantity = cart_item.product.stock
+                cart_item.save()
+            else:
+                item_price = cart_item.product.price * cart_item.quantity
+                total_dict[cart_item.id] = item_price
+                subtotal += item_price
+
+        if subtotal >= coupon.minimum_amount:
+            messages.success(request, 'Coupon applied successfully')
+            request.session['discount'] = coupon.discount_price
+            total = subtotal - coupon.discount_price + shipping_cost
+        else:
+            messages.error(request, 'Coupon not available for this price')
+            total = subtotal + shipping_cost
+
+        for cart_item in cart_items:
+            cart_item.total_price = total_dict.get(cart_item.id, 0)
+            cart_item.save()
+
+        context = {
+            'cart_items': cart_items,
+            'subtotal': subtotal,
+            'total': total,
+            'coupons': coupons,
+            'discount_amount': coupon.discount_price,
+        }
+
+        return render(request, 'cartt.html', context)
+
+    return redirect('cartt')
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+@never_cache  
+def edit_coupon(request,id):
+    if 'admin' in request.session:
+        try:
+            coupon = Coupon.objects.get(id=id)
+        except Section.DoesNotExist:
+            return render(request, 'subcategory_not_found.html')
+
+        context = {'coupon': coupon}
+        return render(request, 'edit_coupon.html', context)
+    else:
+        return redirect ('admin')
+    
+    
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@never_cache
+def update_coupon(request, id):
+    # Use get_object_or_404 to retrieve the coupon or return a 404 page if it doesn't exist
+    coupon = get_object_or_404(Coupon, id=id)
+
+    if request.method == 'POST':
+        coupon_code = request.POST.get('Couponcode')
+        discount_price = request.POST.get('price')
+        minimum_amount = request.POST.get('amount')
+        expiry_date = request.POST.get('date')
+
+        # Check if coupon_code and discount_price are not null before updating
+        if coupon_code:
+            coupon.coupon_code = coupon_code
+        if discount_price:
+            coupon.discount_price = discount_price
+
+        coupon.minimum_amount = minimum_amount
+        coupon.expiry_date = expiry_date
+        coupon.save()  # Save the updated coupon object here
+
+        return redirect('coupon')
+
+    context = {'coupon': coupon}
+    return render(request, 'edit_coupon.html', context)
+def delete_coupon(request,id):
+    try:
+        coupon= Coupon.objects.get(id=id)
+    except Coupon.DoesNotExist:
+        return render(request, 'category_not_found.html')
+
+    coupon.delete()
+
+    coupons = Coupon.objects.all()
+    context = {'coupons': coupons}
+
+    return redirect('coupon')
+
+# user-side search 
+@never_cache
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def search(request):
+    # Get the 'q' parameter from the GET request
+    query = request.GET.get('q', '')
+
+   
+    if query:
+        products = Product.objects.filter(
+            models.Q(product_name__icontains=query) |
+            models.Q(description__icontains=query)
+        )
+    else:
+       
+        products = Product.objects.all()
+
+    search_results = Product.objects.filter(product_name__icontains=query)
+    context = {
+        'products': products,
+        'search_results':  search_results,
+    }
+
+    return render(request, 'search.html',context)
+
+
+def proceed_to_pay(request):
+    cart = Cart.objects.filter(user=request.user)
+    total = 0
+    shipping = 10
+    subtotal=0
+    for cart_item in cart:
+        itemprice=(cart_item.product.price)*(cart_item.quantity)  
+        subtotal=subtotal+itemprice
+    for item in cart:
+       
+    
+        discount = request.session.get('discount', 0)
+    total=subtotal+shipping 
+    if discount:
+        total -= discount
+
+    return JsonResponse({
+        'total' : total
+
+    })
+
+
+def razor_pay(request,address_id):
+    user = request.user
+    cart_items = Cart.objects.filter(user=user)
+    
+  
+    subtotal=0
+    for cart_item in cart_items:
+        
             
-        variation.color = color
-        variation.price = price
-        variation.save()
-        if 'multimage' in request.FILES:
-           for image_file in request.FILES.getlist('multimage'):
-                images = Images.objects.get(id = image_id)
-                images.product = variation.product
-                images.images  = image_file
-                images.save()
-        return redirect('variations')
+        itemprice=(cart_item.product.price)*(cart_item.quantity)
+            
+        subtotal=subtotal+itemprice
+    shipping_cost = 10 
+    total = subtotal + shipping_cost if subtotal else 0
+    payment  =  'razorpay'
+    user     = request.user
+    cart_items = Cart.objects.filter(user=user)
+    address = Address.objects.get(id=address_id)
+
+    
+    order = Order.objects.create(
+        user          =     user,
+        address       =     address,
+        amount        =     total,
+        payment_type  =     payment,
+    )
+
+    for cart_item in cart_items:
+        product = cart_item.product
+        product.stock -= cart_item.quantity
+        product.save()
+
+        order_item = OrderItem.objects.create(
+            order         =     order,
+            product       =     cart_item.product,
+            quantity      =     cart_item.quantity,
+            image         =     cart_item.product.image  
+        )
+    
+    cart_items.delete()
+    return redirect('success')
+
+
+def wallet(request):
+    user = request.user
+    customer=CustomUser.objects.get(email=user)
+    wallet_transactions = Wallet.objects.filter(user=user).order_by('-created_at')
+   
+
+    context = {
+        'wallet_transactions': wallet_transactions,
+        'customer':customer,
+    }
+
+    return render(request, 'wallet.html', context)
+
+
+# admin-side search
+def admin_search(request):
+    query=request.GET.get('q','')
+    
+    if query:
+        orders=Order.objects.filter(
+            models.Q(user__name__icontains=query)
+        )
+        search_results=orders
+    context = {
+        'orders': orders,
+        'search_results':  search_results,
+    }
+
+    return render(request,'admin_search.html',context)
+
+
+def return_order(request,id):
+    user=request.user
+    usercustm=CustomUser.objects.get(email=user)
+    order = Order.objects.get(id=id)
+    order.status='returned'
+    order.save()
+    restock_products(order) 
+
+
+    if order.status == 'returned' and order.payment_type == 'cod':
+        wallet=Wallet.objects.create(
+            user=user,
+            order=order,
+            amount=order.amount,
+            status='Credited',
+        )
+        wallet.save()
+       
+        Order_item_amount=Decimal(order.amount)
+        usercustm.wallet_bal+=Order_item_amount
+        usercustm.save()
+    elif order.status=='returned' and order.payment_type=='razorpay':
+        wallet=Wallet.objects.create(
+        user=user,
+        order= order,
+        amount= order.amount,
+        status='Credited',
+        )
+        wallet.save()
+        order.status='returned'
+        order.save()
+        Order_item_amount=Decimal(order.amount)
+        usercustm.wallet_bal+=Order_item_amount
+        usercustm.save()
+
+    # restock_products(order)
+    # order.status = 'returned'
+    # order.save()
+    return redirect('order_details',id)

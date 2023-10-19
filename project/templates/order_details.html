@@ -21,10 +21,14 @@
             <div>
                 {% if i.status == 'cancelled' %}
                 <label style="color:red">Order cancelled</label>
-                {% else %}
+                {% elif i.status != 'delivered' and i.status != 'completed' and  i.status != 'returned'%}
                 <a href="{% url 'cancel_order' i.id %}"><button type="button" class="btn btn-danger btn-lg">Cancel</button></a>
                 {% endif %}
-            </div>
+                
+                {% if i.status == 'delivered' or i.status == 'completed' %}
+                <a href="{% url 'return_order' i.id %}"><button type="button" class="btn btn-danger btn-lg">Return</button></a>
+                {% endif %}
+            </div>
             <br>
             
             

@@ -8,17 +8,17 @@
 				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
 				</button>
-
+				
 				<div class="collapse navbar-collapse" id="navbarsFurni">
 					<ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
 						<li class="nav-item active">
 							<a class="nav-link" href="{% url 'home' %}">Home</a>
 						</li>
-						<li><a class="nav-link" href="shop.html">Men</a></li>
-						<li><a class="nav-link" href="about.html">Women</a></li>
+						<li><a class="nav-link" href="{% url 'mens' %}">Men</a></li>
+						<li><a class="nav-link" href="{% url 'womens' %}">Women</a></li>
 						<li><a class="nav-link" href="{% url 'wishlist' %}">Wishlist</a></li>
 						<li><a class="nav-link" href="{% url 'shop' %}">Shop</a></li>
-						<li><a class="nav-link" href="contact.html">Contact us</a></li>
+						<li><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
 					</ul>
 
 					<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
@@ -28,7 +28,19 @@
 						<li><a class="nav-link" href="{% url 'signup' %}"><img src="{% static 'images/user.svg' %}" alt="Signup"></a></li>
 						{% endif %}
 					
-						<li><a class="nav-link" href="{% url 'cart' %}"><img src="{% static 'images/cart.svg' %}" alt="Cart"></a></li>
+						<li><a class="nav-link" href="{% url 'cartt' %}"><img src="{% static 'images/cart.svg' %}" alt="Cart"></a></li>
+						<div class="col-lg-6 col-6 text-left" style="width: 500px;margin-left:50px;">
+							<form method="get" action="{% url 'search' %}">
+								<div class="input-group">
+									<input type="text" class="form-control" name="q" placeholder="Search for products">
+									<div class="input-group-append">
+										<button type="submit" class="btn btn-dark">
+											<i class="fa fa-search"></i>
+										</button>
+									</div>
+								</div>
+							</form>
+						</div>
 						
 					</ul>
 				</div>

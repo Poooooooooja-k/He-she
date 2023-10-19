@@ -135,10 +135,14 @@
                                     <th scope="col">Sub category</th>
                                     <th scope="col">Stock</th>
                                     <th scope="col">Price</th>
+                                    <th scope="col">section</th>
+                                    
+                                    <th scope="col">color</th>
+                                   
                                     <!-- <th scope="col">Offer %</th> -->
                                     
                                     <th scope="col">Images</th>
-                                    <th scope="col">Variations</th>
+                                   
                                     <th scope="col">Actions</th>
                                 </tr>
                             </thead>
@@ -152,10 +156,10 @@
                                     <td>{{ product.Sub_category.sub_category_name }}</td>
                                     <td>{{ product.stock }}</td>
                                     <td>{{ product.price }}</td>
+                                    <td>{{ product.section }}</td>
+                                    <td>{{ product.color }}</td>
                                     <td><img src="{{product.image.url}}" alt="" width="100" height="100"></td>
-                                    <td>
-                                        <a href="{% url 'variations' %}" cls="btn-success">Add variation</a>
-                                    </td>
+                                  
                                    
                                     <td>
                                         <a href="{% url 'edit_product' product_id=product.id %}" class="edit" data-toggle="modal">
@@ -166,7 +170,8 @@
                                         </a>
                                     </td>
                                 </tr>
-                                {% endfor %}
+                                {% endfor %} 
+
                             </tbody>
                         </table>
                         <!-- Pagination -->

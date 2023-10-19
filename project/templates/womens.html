@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="author" content="Untree.co">
+  <link rel="shortcut icon" href="favicon.png">
+
+  <meta name="description" content="" />
+  <meta name="keywords" content="bootstrap, bootstrap4"/>
+
+		<!-- Bootstrap CSS -->
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+		<link href="css/tiny-slider.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet">
+		<title>mens</title>       
+	</head>
+
+<body>
+<div class="untree_co-section product-section before-footer-section">
+    <div class="container">
+      <form method="get" action="{% url 'womens' %}">
+      <!-- Brand Filter -->
+      <div class="form-group">
+        <div class="row">
+            <!-- Filter Options (Left Sidebar) -->
+            <div class="col-12 col-md-3">
+              <h4>Filter Options</h4>
+              <!-- Brand Filter -->
+              <div class="form-group">
+                <label for="brand">Brand:</label>
+                <select name="brand" id="brand" class="form-control">
+                    <option value="" selected disabled>Select a brand</option>
+                    {% for product in products %}
+                        <option value="{{ product.product_name }}">{{ product.product_name }}</option>
+                    {% endfor %}
+                </select>
+              </div>
+     <!-- Color Filter -->
+              <div class="form-group">
+                <label for="color">Color:</label>
+                <select name="color" id="color" class="form-control">
+                    <option value="" selected disabled>Select a color</option>
+                    {% for color in unique_colors %}
+                        <option value="{{ color.color }}">{{ color.color }}</option>
+                    {% endfor %}
+                </select>
+              </div>
+
+               
+                <!-- Subcategory Filter -->
+                <div class="form-group">
+                  <label for="sub_category">category:</label>
+                  <select name="sub_category" id="sub_category" class="form-control">
+                      <option value="" selected disabled>Select a category</option>
+                      {% for subcategory in subcategories %}
+                          <option value="{{ subcategory.sub_category_name }}">{{ subcategory.sub_category_name }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+              
+                  
+              <!-- Price Range Filter -->
+              <div class="form-group">
+                <label for="price">Price Range:</label>
+                <select name="price" id="price" class="form-control">
+                <option value="">All Prices</option>
+                <option value="price1">Below 500</option>
+                <option value="price2">500-1000</option>
+                <option value="price3">1000-5000</option>
+                <option value="price4">5000-10,000</option>
+                <option value="price5">10,000-25,000</option>
+                <option value="price6">25,000-50,000</option>
+                <option value="price7">Above 50,000</option>
+                  <!-- Add more price options here -->
+                </select>
+              </div>
+        
+              <button type="submit" class="btn btn-primary">Apply</button>
+            </div>
+          </form>
+            <!-- Product Listings (Right Side) -->
+            <div class="col-12 col-md-9">
+                <div class="row">
+                    {% if womens_watches_products %}
+                        {% for product in womens_watches_products %}
+                            <!-- Start Column 1 -->
+                            <div class="col-12 col-md-4 col-lg-3 mb-5">
+                                <a class="product-item" href="/product_details/{{product.id}}">
+                                    <img src="{{ product.image.url }}" class="img-fluid product-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                    <h3 class="product-title">{{ product.product_name}}</h3>
+                                    <p class="product-description">{{product.description}}</p>
+                                    <strong class="product-price">{{product.price}}</strong>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12">
+                            <h5>No products available.</h5>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+          </div>
+    </div>
+</div></body>
+{% endblock %}
+
+
