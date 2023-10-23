@@ -142,6 +142,8 @@ urlpatterns=[
 
     # wallet
     path('wallet/',views.wallet,name='wallet'),
+    # invoice
+    path('invoice/<int:id>/',views.invoice,name='invoice'),
 
 ]
 if settings.DEBUG:

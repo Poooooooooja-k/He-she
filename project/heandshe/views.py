@@ -28,6 +28,16 @@ from django.http import JsonResponse
 import json
 from django.db.models import Count
 from decimal import Decimal
+from django.http import FileResponse
+from reportlab.lib.pagesizes import letter,inch
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle,Paragraph,Spacer
+from reportlab.lib.styles import getSampleStyleSheet , ParagraphStyle
+
+
+
+import io
 # Create your views here.
 
 def base(request):
@@ -64,15 +74,27 @@ def adminlogin(request):
                 return render(request, 'adminlogin.html') 
         else:
              return render (request,'adminlogin.html')
-        
+
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache
 def dashboard(request):
-    if 'admin' in request.session:
-        return render(request,'dashboard.html')
-    else:
-        return redirect('adminlogin')
+    orders = Order.objects.order_by('-id')[:5]
+    labels = []
+    data = []
+    for order in orders:
+        labels.append(str(order.id))
+        data.append(order.amount)
+    context = {
+        'labels': json.dumps(labels),
+        'data': json.dumps(data),
+    }
 
+    if 'admin' in request.session:
+        return render(request,'dashboard.html',context)
+    else:
+        return redirect('admin')
+    
+    
 @never_cache   
 def admin_logout(request):
     if 'admin' in request.session:
@@ -935,7 +957,7 @@ def check_out(request):
 
     shipping_cost = 10 
    
-    discount = request.session.get('discount', 0)
+    discount = request.session.get('discount',0)
     if discount:
         total = subtotal + shipping_cost - discount if subtotal else 0
         
@@ -1044,9 +1066,10 @@ def order_placed(request):
 
 def success(request):
     orders = Order.objects.order_by('-id')[:1]
+    print(orders,"...................")
+
     context = {
         'orders'  : orders,
-
     }
     return render(request,'order_placed.html',context)
 
@@ -1638,7 +1661,7 @@ def edit_coupon(request,id):
     else:
         return redirect ('admin')
     
-    
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @never_cache
 def update_coupon(request, id):
@@ -1839,3 +1862,82 @@ def return_order(request,id):
     # order.status = 'returned'
     # order.save()
     return redirect('order_details',id)
+
+
+
+
+
+def invoice(request, id):
+   
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=letter)
+    data = []
+    top_content = []
+    title_style = ParagraphStyle(
+        name='TitleStyle',
+        fontSize=18,
+        alignment=1,
+    )
+    title = Paragraph("He & She Invoice", title_style)
+    top_content.append(title)
+    top_content.append(Spacer(1, 12))
+
+    orders = Order.objects.filter(id=id)
+    order_items = OrderItem.objects.filter(order_id=id)
+
+    total_amount = 0
+    total_quantity = 0
+    shipping_cost = 10  
+
+    for o in orders:
+        for i in order_items:
+            data.append(["Order Details"])
+            data.append(["Name:", o.user.name])
+            data.append(["Product:", i.product.product_name])
+            
+          
+            
+            data.append(["Payment Type:", o.payment_type])
+
+            total_amount += (i.quantity * i.product.price + shipping_cost)
+            total_quantity += i.quantity
+
+            data.append(["Address:", f"{o.address.full_name}, {o.address.house_no}"])
+            data.append(["Phone No:", o.address.phone_no])
+            data.append(["Pin:", o.address.post_code])
+  
+    data.append(["Price:", i.product.price])
+    data.append(["Quantity:", i.quantity])
+    data.append(["Shipping Cost:", shipping_cost])
+    data.append(["Total Amount:", total_amount])
+   
+    table = Table(data)
+    
+ 
+    table_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ])
+    table.setStyle(table_style)
+    
+  
+    story = []
+    
+   
+    story.extend(top_content)
+    
+    
+    story.append(table)
+    
+    doc.build(story)
+
+   
+    buf.seek(0)
+    
+  
+    return FileResponse(buf, as_attachment=True, filename='invoice.pdf')

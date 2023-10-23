@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .invoice {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            background-color: #fff;
+        }
+        
+        header h1 {
+            text-align: center;
+        }
+        
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .invoice-details .from,
+        .invoice-details .to {
+            width: 48%;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        table th, table td {
+            padding: 8px;
+            border: 1px solid #000;
+            text-align: left;
+        }
+        
+        .invoice-total {
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice">
+        <header>
+            <h1>Invoice</h1>
+        </header>
+        <main>
+            <div class="invoice-details">
+                <div class="from">
+                    <strong>warehouse:</strong>kacherakanahalli village
+                    <br>
+                    hostoke village<br>
+                    Bengaluru,Karnataka,India 560067<br>
+                </div>
+
+                <div class="to">
+                    <strong>shipping Address:</strong>
+                    <P>{{ address.house_no }}</P>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in cart_items %}
+                    <tr>
+                        <td>i.product.product_name</td>
+                        <td>i.quantity</td>
+                        <td>i.product.price</tr>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="invoice-total">
+                <strong>Sub total:</strong>  ${{ subtotal }}
+                <strong>Total Amount:</strong> ${{ total }}
+            </div>
+        </main>
+    </div>
+</body>
+</html>
