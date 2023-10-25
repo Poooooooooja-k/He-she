@@ -99,7 +99,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Category</label>
-                                    <select name="category" class="form-control" required>
+                                    <select name="category" class="form-control" >
                                         <option value="" selected disabled>Select a category</option>
                                         {% for category in categories %}
                                             <option value="{{ category.category_name }}">{{ category.category_name }}</option>
@@ -112,7 +112,7 @@
 
                                 <div class="form-group">
                                     <label> sub Category</label>
-                                    <select name=" sub_category" class="form-control" required>
+                                    <select name=" sub_category" class="form-control" >
                                         <option value="" selected disabled>Select a sub category</option>
 
                                         {% for category in categories %}
@@ -126,7 +126,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Section</label>
-                                    <select name="section" class="form-control" required>
+                                    <select name="section" class="form-control" >
                                         <option value="" selected disabled>Select a Section</option>
                                         {% for section in sections %}
                                             <option value="{{ section.name }}">{{ section.name }}</option>

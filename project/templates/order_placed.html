@@ -24,9 +24,7 @@
           <a href="{% url 'customer_order' %}" class=" btn-sm btn-outline-black"><button>order details</button></a>
           
           {% for i in orders %}
-          <h1>{{ i.id }}</h1>
-          <a href="{% url 'invoice' i.id %}" class="btn btn-sm btn-outline-black">Download Invoice</a>
-
+          <a href="{% url 'invoice' i.id %}" class="btn btn-sm btn-outline-black"><button>Download Invoice</button></a>
           {% endfor %}
         </div>
       </div>

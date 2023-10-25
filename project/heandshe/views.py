@@ -47,6 +47,7 @@ def home(request):
         return redirect('home')
     section=Section.objects.filter(id= 4).first()
     product=Product.objects.filter(section_id=4)
+    banner=Banner.objects.all()
 
     print(product,"....")
     # product=Product.objects.filter(category__category_name='category')
@@ -54,6 +55,7 @@ def home(request):
     context={
         'section' :section,
         'products':product,
+        'banner':banner,
     }
     return render(request, 'home.html',context)
 
@@ -78,19 +80,9 @@ def adminlogin(request):
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache
 def dashboard(request):
-    orders = Order.objects.order_by('-id')[:5]
-    labels = []
-    data = []
-    for order in orders:
-        labels.append(str(order.id))
-        data.append(order.amount)
-    context = {
-        'labels': json.dumps(labels),
-        'data': json.dumps(data),
-    }
-
+  
     if 'admin' in request.session:
-        return render(request,'dashboard.html',context)
+        return render(request,'dashboard.html')
     else:
         return redirect('admin')
     
@@ -543,6 +535,8 @@ def edit_product(request, product_id):
         return render(request, 'edit_product.html', context)
     else:
         return redirect('admin')
+    
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @never_cache
 def update_product(request, product_id):
@@ -551,18 +545,20 @@ def update_product(request, product_id):
     if request.method == 'POST':
         product.product_name = request.POST.get('product_name')
         product.description = request.POST.get('description')
-        category_name = request.POST.get('category')
-        category = Category.objects.get(category_name=category_name)
-        product.category = category
+        if request.POST.get('category'):
+            category_name = request.POST.get('category')
+            category = Category.objects.get(category_name=category_name)
+            product.category = category
 
         # Fetch the Section instance based on the section name
-        section_name = request.POST.get('section')
-        try:
-            section = Section.objects.get(name=section_name)
-            product.section = section
-        except Section.DoesNotExist:
-            # Handle the case where the section does not exist
-            return HttpResponse("Section not found")
+        if request.POST.get('section'):
+            section_name = request.POST.get('section')
+            try:
+                section = Section.objects.get(name=section_name)
+                product.section = section
+            except Section.DoesNotExist:
+                # Handle the case where the section does not exist
+                return HttpResponse("Section not found")
         product.color = request.POST.get('color')
         product.stock = request.POST.get('stock')
         product.price = request.POST.get('price')
@@ -571,9 +567,12 @@ def update_product(request, product_id):
         if image:
             product.image = image
         product.save()
+        mul_image=request.FILES.getlist('images')
+        if mul_image:
+            for image in mul_image:
 
-        for image in request.FILES.getlist('images'):
-            im = Images.objects.create(product=product, images=image)
+                im = Images(product=product, images=image)
+                im.save()
 
         return redirect('product')
     else:
@@ -1588,7 +1587,9 @@ def add_coupon(request):
         discount_price  = request.POST.get('dprice')
         minimum_amount = request.POST.get('amount')
         expiry_date=request.POST.get('date')
-        
+        if float(discount_price) < 0:
+            messages.error(request, 'Discount price cannot be less than 0')
+            return redirect('coupon')
         coupon = Coupon(coupon_code=coupon_code, discount_price=discount_price, minimum_amount=minimum_amount,expiry_date=expiry_date)
         coupon.save()
 
@@ -1864,80 +1865,123 @@ def return_order(request,id):
     return redirect('order_details',id)
 
 
-
-
-
-def invoice(request, id):
-   
-    buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=letter)
-    data = []
-    top_content = []
-    title_style = ParagraphStyle(
-        name='TitleStyle',
-        fontSize=18,
-        alignment=1,
-    )
-    title = Paragraph("He & She Invoice", title_style)
-    top_content.append(title)
-    top_content.append(Spacer(1, 12))
-
+def invoice(request,id):
+    buf= io.BytesIO()
+    c= canvas.Canvas(buf,pagesize=letter, bottomup=0)
+    textob=c.beginText()
+    textob.setTextOrigin(inch,inch)
+    textob.setFont("Helvetica",14)
     orders = Order.objects.filter(id=id)
-    order_items = OrderItem.objects.filter(order_id=id)
-
-    total_amount = 0
-    total_quantity = 0
-    shipping_cost = 10  
-
+    order_items = OrderItem.objects.filter(order=id)
+    lines = []
+    lines.append("Stop & Shop")    
+    lines.append("Invoice:")    
     for o in orders:
         for i in order_items:
-            data.append(["Order Details"])
-            data.append(["Name:", o.user.name])
-            data.append(["Product:", i.product.product_name])
-            
-          
-            
-            data.append(["Payment Type:", o.payment_type])
-
-            total_amount += (i.quantity * i.product.price + shipping_cost)
-            total_quantity += i.quantity
-
-            data.append(["Address:", f"{o.address.full_name}, {o.address.house_no}"])
-            data.append(["Phone No:", o.address.phone_no])
-            data.append(["Pin:", o.address.post_code])
-  
-    data.append(["Price:", i.product.price])
-    data.append(["Quantity:", i.quantity])
-    data.append(["Shipping Cost:", shipping_cost])
-    data.append(["Total Amount:", total_amount])
-   
-    table = Table(data)
-    
- 
-    table_style = TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-    ])
-    table.setStyle(table_style)
-    
-  
-    story = []
-    
-   
-    story.extend(top_content)
-    
-    
-    story.append(table)
-    
-    doc.build(story)
-
-   
+            lines.append(f"Name: {o.user.name}")
+            lines.append(f"Product: {i.product.product_name}")
+            lines.append(f"Quantity: {i.quantity}")
+            lines.append(f"Price: {i.product.price}")
+            lines.append(f"Payment Type: {o.payment_type}")
+            lines.append(f"Amount: {o.amount}")
+            lines.append("")
+    for line in lines:
+        textob.textLine(line)
+    c.drawText(textob)
+    c.showPage()
+    c.save()
     buf.seek(0)
+        
+    return FileResponse(buf,as_attachment=True,filename='invoice.pdf')
+
+
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+@never_cache  
+def banner(request):
+    if 'admin' in request.session:
+
+        banner=Banner.objects.all()
+        context = {
+
+            'banner':banner,
+    }
+        return render(request,'banner.html',context)
+
+    else:
+        return redirect('admin')
+
+def add_banner(request):
+    if 'admin' in request.session:
+            
+        if request.method == 'POST':
+            description = request.POST.get('description')
+            image = request.FILES.get('image')
+            banner = Banner(description=description, image=image)
+            banner.save()
+        
+            return redirect('banner') 
+        return render(request,'add_banner.html') 
+    else:
+        return redirect('admin')
+
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+@never_cache  
+def edit_banner(request, banner_id):
+    if 'admin' in request.session:
+        try:
+            banner = Banner.objects.get(id=banner_id)
+        except Banner.DoesNotExist:
+        
+            return render(request, 'product_not_found.html')
+        
+        
+        context = {
+            'banner': banner,
+            
+        }
+
+        return render(request, 'edit_banner.html', context)
+    else:
+        return redirect('admin')
     
+
+   
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@never_cache
+def update_banner(request,banner_id):
+    banner= Banner.objects.get(id=banner_id)
+
+    if request.method == 'POST':
+        
+        banner.description = request.POST.get('description')
+        image = request.FILES.get('image')
+
+        if image:
+            banner.image = image
+        banner.save()
+      
+        return redirect('banner')
+    else:
+        context = {
+            'banner': banner,
+        }
+        return render(request, 'banner.html', context)
+    
+
+
+def delete_banner(request,banner_id):
+    print(banner_id)
+    try:
+        banner = Banner.objects.get(id=banner_id)
+        banner.delete()
+    except Banner.DoesNotExist:
+        return render(request, 'category_not_found.html')
+
+    
+    return redirect('banner')
+
   
-    return FileResponse(buf, as_attachment=True, filename='invoice.pdf')

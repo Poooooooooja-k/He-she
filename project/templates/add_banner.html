@@ -5,11 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit category</title>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.5.0/css/bootstrap.min.css">
-    
-    
+    <title>Add banner</title>
 
     <!-- Favicon -->
     <link href="img/favicon.ico" rel="icon">
@@ -25,7 +21,7 @@
 
     <!-- Libraries Stylesheet -->
     <link href="{% static 'admin/admin/lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
-    <link href="{% static 'admin/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'admin/admin/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet" />
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{% static 'admin/admin/css/bootstrap.min.css' %}" rel="stylesheet">
@@ -35,33 +31,36 @@
      <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    
+
+
+
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.5.0/js/bootstrap.bundle.min.js"></script>
 
 </head>
 <body>
     <div class="container-xxl position-relative bg-white d-flex p-0">
-        <!-- Sidebar Start -->
-        <div class="sidebar pe-4 pb-3">
-            {% include 'snippets/adminsidebar.html' %}
-        </div>
-        <!-- Sidebar End -->
+       
+       <!-- Sidebar Start -->
+       <div class="sidebar pe-4 pb-3">
+        {% include 'snippets/adminsidebar.html' %}
+    </div>
+    <!-- Sidebar End -->
 
         <!-- Content Start -->
         <div class="content">
             <!-- Navbar Start -->
             <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">
                 <a href="#" class="navbar-brand d-flex d-lg-none me-4">
-                    <!-- <h2 class="text-primary mb-0"><i class="fa fa-hashtag"></i></h2> -->
+                   
                 </a>
                 <a href="#" class="sidebar-toggler flex-shrink-0">
                     <i class="fa fa-bars"></i>
                 </a>
-                <!-- <form class="d-none d-md-flex ms-4">
-                    <input class="form-control border-0" type="search" placeholder="Search">
-                </form> -->
+               
                 <div class="navbar-nav align-items-center ms-auto">
-                   
+                    
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                             <img class="rounded-circle me-lg-2" src="{% static 'admin/admin/img/looogoo.png' %}" alt="" style="width: 40px; height: 40px;">
@@ -75,51 +74,55 @@
                     </div>
                 </div>
             </nav>
-            <!-- edit -->
-            <div id="#" class="">
+
+            <div class="">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <form action="{% url 'update_category' category.id %}"  method="post" enctype="multipart/form-data">
+                        <form action="{% url 'add_banner' %}" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="modal-header">						
-                                <h4 class="modal-title">Edit Category</h4>
-                                
+                                <h4 class="modal-title">Add Banner</h4>
                             </div>
-                            <div class="modal-body">					
-                                <div class="form-group">
-                                    <label>Category_name</label>
-                                    <input name="category_name" type="text" class="form-control" value="{{ category.category_name }}"  required>
-                                </div>
-    
-                            
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input name="description" type="text" class="form-control" required maxlength="1000">
+                            </div>
+                            <div class="form-group">
+                                <label>Image</label>
+                                <input name="image" type="file" class="form-control" accept="image/*" required>
+                            </div>
                             <div class="modal-footer">
-                                <a href="{% url 'category' %}"><button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button></a>
-                                <input type="submit" class="btn btn-success" value="Update">
+                                <a href="{% url 'banner' %}"> 
+                                    <input type="button" class="btn btn-default" data-dismiss="" value="Cancel">
+                                </a>
+                                <input type="submit" class="btn btn-success" value="Add" multiple>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
+            
            
   
 
 
-<!-- JavaScript Libraries -->
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="lib/chart/chart.min.js"></script>
-<script src="lib/easing/easing.min.js"></script>
-<script src="lib/waypoints/waypoints.min.js"></script>
-<script src="lib/owlcarousel/owl.carousel.min.js"></script>
-<script src="lib/tempusdominus/js/moment.min.js"></script>
-<script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
-<script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+    <!-- JavaScript Libraries -->
+    <!-- <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/chart/chart.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+    <script src="lib/waypoints/waypoints.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="lib/tempusdominus/js/moment.min.js"></script>
+    <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
+    <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 
-<!-- Template Javascript -->
-<script src="{% static 'admin/js/main.js' %}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.5.0/js/bootstrap.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- Template Javascript -->
+    <script src="{% static 'admin/js/main.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.5.0/js/bootstrap.min.js"></script>
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script> -->
+    
 
 </body>
 </html>

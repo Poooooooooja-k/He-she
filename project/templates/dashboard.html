@@ -176,33 +176,6 @@
     <!-- Template Javascript -->
     <script src="{% static 'admin/admin/js/main.js' %}"></script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Get the chart data from the server-side
-            var worldwideData = JSON.parse('{{ worldwide_sales_chart_data|safe }}');
-            var salesRevenueData = JSON.parse('{{ sales_revenue_chart_data|safe }}');
-    
-            // Create and render the worldwide sales chart
-            var worldwideCtx = document.getElementById("worldwide-sales").getContext("2d");
-            new Chart(worldwideCtx, {
-                type: 'line',
-                data: worldwideData,
-                options: {
-                    // Chart options
-                }
-            });
-    
-            // Create and render the sales & revenue chart
-            var salesRevenueCtx = document.getElementById("sales-revenue").getContext("2d");
-            new Chart(salesRevenueCtx, {
-                type: 'bar',
-                data: salesRevenueData,
-                options: {
-                    // Chart options
-                }
-            });
-        });
-    </script>
     
 </body>
 
