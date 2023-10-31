@@ -39,14 +39,12 @@
              
             </div>
 
-            
-
                 <div class="form-group row">
                   <div class="col-md-12">
                     <label for="addressDropdown">Select Address:</label>
                     <select id="addressDropdown" name="addressId">
                         <option value="">Select an address</option>
-                        {% for i in address %}
+                        {% for i in address %}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    %}
                         <option value="{{ i.id }}">{{  i.full_name }} {{ i.house_no  }}, {{ i.street }},{{ i.city}},{{ i.state}}</option>
                         {% endfor %}
                     </select>
@@ -80,7 +78,7 @@
         
         <div class="col-md-6">
 
-           <
+           
               <h2 class="h3 mb-3 text-black">Your Order</h2>
               <div class="p-3 p-lg-5 border bg-white">
                 <table class="table site-block-order-table mb-5">
@@ -93,7 +91,22 @@
                   <tbody>
                     <tr>
                       <td>{{ cart_item.product.product_name}}</td>
-                      <td>₹{{ cart_item.product.price }}</td>
+                      {% if cart_item.product.category.category_offer %}
+
+                      {% with offer_price=cart_item.product.price|add:'-'|add:cart_item.product.category.category_offer %}
+                          <p>₹{{ cart_item.product.price }} - (₹{{ cart_item.product.category.category_offer }})</p>
+                      {% endwith %}
+
+                      {% elif cart_item.product.product_offer %}
+                          {% with offer_price=cart_item.product.price|add:'-'|add:cart_item.product.category.category_offer %}
+                          <p>₹{{ cart_item.product.price }} - {{cart_item.product.product.product_offer}}</p>
+                      {% endwith %}
+                          
+
+                      {% else %}
+                          <td>₹{{ cart_item.product.price }}</td>
+                      {% endif %}
+                      
                       <td>x {{ cart_item.quantity }}</td>
 
                     </tr>

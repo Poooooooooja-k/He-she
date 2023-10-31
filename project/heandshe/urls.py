@@ -69,7 +69,7 @@ urlpatterns=[
     
 
     # cart
-    # path('cart/',views.cart,name='cart'),
+   
     path('cartt/',views.cartt,name='cartt'),
     path('remove_from_cart/<int:id>/', views.remove_from_cart, name='remove_from_cart'),
     path('update-cart/<int:productId>/', views.update_cart, name='update_cart'),
@@ -99,16 +99,6 @@ urlpatterns=[
     path('reset_password/', views.reset_password,name='reset_password'),
 
 
-    # variation
-    # path('variations/',views.variations,name='variations'),
-    # path('variations/<int:product_id>/',views.variations,name='variations'),
-    # path('delete_variation/<int:id>/', views.delete_variation, name='delete_variation'),
-    # path('edit_variation/<int:id>/',views.edit_variation,name='edit_variations' ),
-    # path('update_variations/<int:id>/',views.update_variation,name='update_variation'),
-    # path('add_variations/',views.add_variation,name='add_variation'),
-    # path('display_variations/',views.display_variations,name='display_variations'),
-
-
    #section
     path('section/',views.section, name = 'section'),
     path('add_section/',views.add_section,name= 'add_section'),
@@ -132,6 +122,7 @@ urlpatterns=[
 
     # search
     path('search/',views.search,name='search'),
+    path('search-suggestions/', views.search_suggestions, name='search_suggestions'),
     # admin_search
     path('admin_search/',views.admin_search,name='admin_search'),
    
@@ -152,6 +143,11 @@ urlpatterns=[
     path('update_banner/<int:banner_id>/',views.update_banner,name='update_banner'),
     path('delete_banner/<int:banner_id>/',views.delete_banner,name='delete_banner'),
 
+
+    #salesreprt
+    path('report-pdf-order/', views.report_pdf_order, name='report_pdf_order'),
+    path('chart-demo/', views.chart_demo, name='chart_demo'),
+    path('report_generator/<int:id/',views.report_generator,name='report_generator'),
 
 ]
 if settings.DEBUG:

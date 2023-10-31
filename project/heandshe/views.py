@@ -3,16 +3,6 @@ from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import cache_control, never_cache
 from django.contrib import messages
-from .models import  CustomUser
-from .models import Category
-from .models import Sub_category
-from .models import Product
-from .models import Images
-from .models import Address
-from .models import Wishlist
-from .models import Cart
-from .models import Order
-from .models import OrderItem
 from .models import*
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
@@ -34,31 +24,53 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle,Paragraph,Spacer
 from reportlab.lib.styles import getSampleStyleSheet , ParagraphStyle
-
-
+import base64
+import matplotlib.pyplot as plt
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+from datetime import datetime
+from reportlab.lib.pagesizes import A4
 
 import io
 # Create your views here.
 
 def base(request):
     return render(request,'base.html')
+
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@never_cache
 def home(request):
-    if 'email' in request.session:
-        return redirect('home')
-    section=Section.objects.filter(id= 4).first()
-    product=Product.objects.filter(section_id=4)
-    banner=Banner.objects.all()
+    if 'admin' in request.session:
+        return redirect('dashboard')
+  
+    section = Section.objects.filter(id=4).first()
+    product = Product.objects.filter(section_id=4)
+    banner = Banner.objects.all()
+    search_query = request.GET.get('q')
 
-    print(product,"....")
-    # product=Product.objects.filter(category__category_name='category')
-    
-    context={
-        'section' :section,
-        'products':product,
-        'banner':banner,
+    if search_query:
+        # If there is a search query, perform the search
+        products = Product.objects.filter(
+            Q(product_name__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+    else:
+        # If no search query, return all products in the specified section
+        products = product
+
+    context = {
+        'section': section,
+        'products': products,
+        'banner': banner,
+        'search_query': search_query,
     }
-    return render(request, 'home.html',context)
+    return render(request, 'home.html', context)
 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@never_cache
 def adminlogin(request):
     if 'admin' in request.session:
         return redirect('dashboard')
@@ -77,15 +89,37 @@ def adminlogin(request):
         else:
              return render (request,'adminlogin.html')
 
-@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @never_cache
 def dashboard(request):
-  
+
     if 'admin' in request.session:
-        return render(request,'dashboard.html')
+        # Retrieve data for products (assuming you have a model named Product)
+        products = Product.objects.order_by('-id')[:5]
+        
+        # Process product data for bar chart (order distribution)
+        order_labels = [f'Order {product.id}' for product in products]
+        order_amounts = [product.price for product in products]  # Use any field you want for the order amount
+        
+        # Process product data for pie chart (stock distribution)
+        stock_labels = [product.product_name for product in products]
+        stock_amounts = [product.stock for product in products]
+        
+        # Convert data to JSON format for JavaScript
+        order_data = json.dumps(order_amounts)
+        stock_data = json.dumps(stock_amounts)
+        
+        context = {
+            'order_labels': order_labels,
+            'order_data': order_data,
+            'stock_labels': stock_labels,
+            'stock_data': stock_data,
+        }
+        return render(request, 'dashboard.html', context)
     else:
         return redirect('admin')
-    
+  
     
 @never_cache   
 def admin_logout(request):
@@ -233,10 +267,18 @@ def verify_signup(request):
 def generate_otp(length = 6):
     return ''.join(secrets.choice("0123456789") for i in range(length)) 
     
-
+@never_cache
 def user_login(request):
+    if 'email' and 'otp' in request.session:
+        request.session.flush()
+        return redirect('login')
+    
     if 'email' in request.session:
         return redirect('home')
+    
+    if 'admin' in request.session:
+        return redirect('admin')
+    
     if request.method == "POST":
         email = request.POST.get('email')  # Use 'email' instead of 'username'
         password = request.POST.get('password')
@@ -246,6 +288,7 @@ def user_login(request):
 
         if user is not None:
             login(request, user)
+            request.session['email']=email
             return redirect('home')
         else:
             messages.error(request, 'Email and password are invalid!')
@@ -253,6 +296,7 @@ def user_login(request):
     return render(request, 'login.html')
 
 
+@never_cache
 def logout(request):
     if 'email' in request.session:
         request.session.flush()
@@ -285,7 +329,9 @@ def add_category(request):
         if request.method  == 'POST':
            
             category_name       =   request.POST.get('category_name')
-            category = Category.objects.create(category_name = category_name)   
+            category_offer_description=request.POST.get('category_offer_description')
+            category_offer=request.POST.get('category_offer')
+            category = Category.objects.create(category_name = category_name,category_offer_description=category_offer_description,category_offer=category_offer)   
             category.save() 
 
             return redirect('category')  
@@ -303,11 +349,16 @@ def update_category(request, id):
         return HttpResponse("Error")
 
     if request.method == 'POST':
-        category_name = request.POST.get('category_name')
+        category_name               = request.POST.get('category_name')
+        category_offer_description  =request.POST.get('category_offer_description')
+        category_offer  =request.POST.get('category_offer')
         if category_name:
-            category.category_name           =  category_name
+            category.category_name               =  category_name
+            category.category_offer_description  =category_offer_description
+            category.category_offer              =category_offer
         category.save()
         return redirect('category')
+    
 
     context = {'category': category}
     return render(request, 'edit_category.html', context)
@@ -476,6 +527,7 @@ def add_product(request):
             color=request.POST.get('color')
             stock = request.POST.get('stock')
             price = request.POST.get('price')
+            offer=request.POST.get('offer')
             image = request.FILES.get('image')
 
             try:
@@ -493,6 +545,7 @@ def add_product(request):
                     section=section,  # Assign the Section instance
                     color=color,
                     stock=stock,
+                    product_offer=offer,
                     price=price,
                     image=image,
                 )
@@ -561,6 +614,7 @@ def update_product(request, product_id):
                 return HttpResponse("Section not found")
         product.color = request.POST.get('color')
         product.stock = request.POST.get('stock')
+        product.product_offer = request.POST.get('offer')
         product.price = request.POST.get('price')
         image = request.FILES.get('image')
 
@@ -570,7 +624,6 @@ def update_product(request, product_id):
         mul_image=request.FILES.getlist('images')
         if mul_image:
             for image in mul_image:
-
                 im = Images(product=product, images=image)
                 im.save()
 
@@ -598,10 +651,22 @@ def delete_product(request, product_id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @never_cache    
 def userproductpage(request,id):
-    product = Product.objects.filter(id=id) # Get a single product by ID
     
+    product = Product.objects.filter(id=id).first()
+    discounted_price = None
+    offer_price = None
+    if product.category.category_offer:
+        discounted_price = product.price - product.category.category_offer
+    product.discounted_price = discounted_price
+    
+    
+    if product.product_offer:
+        offer_price        = product.price -(product.price * product.product_offer/100)
+    product.offer_price    = offer_price
     context = {
         'product': product,
+        'discounted_price': discounted_price,
+        
     }
 
     return render(request, 'product_details.html', context)
@@ -611,7 +676,6 @@ def shop(request):
     all_products = Product.objects.all()
     unique_colors = Product.objects.values('color').annotate(count=Count('color')).order_by('color')
     brands = Product.objects.values_list('product_name', flat=True).distinct()
-   
 
     # Filter products based on brand, color, and price
     selected_brand = request.GET.get('brand')
@@ -621,6 +685,16 @@ def shop(request):
 
     # Start with all products and filter based on selected options
     products = all_products
+    for product in products:
+        discounted_price = None
+        if product.category.category_offer:
+            discounted_price = product.price - product.category.category_offer
+        product.discounted_price = discounted_price
+
+        offer_price = None
+        if product.product_offer:
+            offer_price        =  product.price -(product.price * product.product_offer/100)
+        product.offer_price    =  offer_price
 
     if selected_brand:
         products = products.filter(product_name=selected_brand)  # Use 'product_name' for brand filtering
@@ -652,6 +726,8 @@ def shop(request):
             # Filter for products with prices within the selected price range
             products = products.filter(price__range=price_range)
     
+
+    
     subcategories = Sub_category.objects.values('sub_category_name').distinct()
     context = {
         'all_products': all_products,
@@ -662,15 +738,16 @@ def shop(request):
     }
     return render(request, 'shop.html', context)
 
-@login_required
-@user_passes_test(lambda u: not u.is_staff, login_url='login') 
-def profile(request):
-    user=request.user
-    context={
-        'user':user,
-    }
-    return render(request,'profile.html',context)
 
+@never_cache
+def profile(request):
+    if 'email' in request.session:
+        user=request.user
+        context={
+            'user':user,
+        }
+        return render(request,'profile.html',context)
+    return redirect('logout')
 
 
 def update_profile(request):
@@ -856,6 +933,15 @@ def cartt(request):
             messages.warning(request, f"{cart_item.product.product_name} is out of stock.")
             cart_item.quantity = cart_item.product.stock
             cart_item.save()
+        if cart_item.product.category.category_offer:
+            item_price = (cart_item.product.price - cart_item.product.category.category_offer) * cart_item.quantity
+            total_dict[cart_item.id] = item_price
+            subtotal += item_price
+
+        elif cart_item.product.product_offer:
+            item_price = (cart_item.product.price - (cart_item.product.price * cart_item.product.product_offer/100)) * cart_item.quantity
+            total_dict[cart_item.id] = item_price
+            subtotal += item_price
         else:
             item_price = cart_item.product.price * cart_item.quantity
             total_dict[cart_item.id] = item_price
@@ -863,6 +949,7 @@ def cartt(request):
 
     shipping_cost = 10
     total = subtotal + shipping_cost
+    coupons = Coupon.objects.all()
      
 
     for cart_item in cart_items:
@@ -877,6 +964,8 @@ def cartt(request):
         'cart_items': cart_items,
         'subtotal': subtotal,
         'total': total,
+        'coupons': coupons,
+       
         
     }
 
@@ -887,7 +976,7 @@ def cartt(request):
 
 @never_cache
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
-def add_to_cart(request, id):
+def add_to_cart(request,id):
     try:
         product = Product.objects.get(id=id)
     except Product.DoesNotExist:
@@ -951,8 +1040,15 @@ def check_out(request):
     subtotal = 0
 
     for cart_item in cart_items:
-        itemprice = (cart_item.product.price) * (cart_item.quantity)
-        subtotal += itemprice  # Update subtotal inside the loop
+        if cart_item.product.category.category_offer:
+                itemprice=(cart_item.product.price - cart_item.product.category.category_offer)*(cart_item.quantity)
+                subtotal=subtotal+itemprice
+        elif cart_item.product.product_offer:
+                itemprice =  (cart_item.product.price - (cart_item.product.price * cart_item.product.product_offer/100)) * cart_item.quantity
+                subtotal=subtotal+itemprice
+        else:
+                itemprice = (cart_item.product.price) * (cart_item.quantity)
+                subtotal = subtotal + itemprice
 
     shipping_cost = 10 
    
@@ -987,9 +1083,6 @@ def shipping_address(request):
         phone_no = request.POST.get('phone_no')
         city = request.POST.get('city')
 
-       
-       
-
         if not full_name or not house_no or not post_code or not state or not street or not phone_no or not city :
             messages.error(request, 'Please input all the details!!!')
             return redirect('check_out')
@@ -1012,6 +1105,62 @@ def shipping_address(request):
     else:
         return render(request, 'check_out.html')
     
+
+def razor_pay(request,address_id):
+    user = request.user
+    cart_items = Cart.objects.filter(user=user)
+    
+  
+    subtotal=0
+    for cart_item in cart_items:
+        if cart_item.product.category.category_offer:
+            
+            itemprice=(cart_item.product.price - cart_item.product.category.category_offer)*(cart_item.quantity)
+            subtotal=subtotal+itemprice
+        elif cart_item.product.product_offer:
+            itemprice =  (cart_item.product.price - (cart_item.product.price * cart_item.product.product_offer/100)) * cart_item.quantity
+            subtotal=subtotal+itemprice    
+        else:
+            itemprice=(cart_item.product.price)*(cart_item.quantity)  
+            subtotal=subtotal+itemprice
+    shipping_cost = 10 
+    total = subtotal + shipping_cost if subtotal else 0
+    
+    discount = request.session.get('discount', 0)
+    
+    if discount:
+        total -= discount 
+
+    payment  =  'razorpay'
+    user     = request.user
+    cart_items = Cart.objects.filter(user=user)
+    address = Address.objects.get(id=address_id)
+
+    
+    order = Order.objects.create(
+        user          =     user,
+        address       =     address,
+        amount        =     total,
+        payment_type  =     payment,
+    )
+
+    for cart_item in cart_items:
+        product = cart_item.product
+        product.stock -= cart_item.quantity
+        product.save()
+
+        order_item = OrderItem.objects.create(
+            order         =     order,
+            product       =     cart_item.product,
+            quantity      =     cart_item.quantity,
+            image         =     cart_item.product.image  
+        )
+    
+    cart_items.delete()
+    return redirect('success')
+
+
+
 @login_required
 def order_placed(request):
     user = request.user
@@ -1065,7 +1214,6 @@ def order_placed(request):
 
 def success(request):
     orders = Order.objects.order_by('-id')[:1]
-    print(orders,"...................")
 
     context = {
         'orders'  : orders,
@@ -1114,10 +1262,8 @@ def updateorder(request):
 
         order.status = status
         order.save()   
-        messages.success(request, 'Order status updated successfully.')
-
+        # messages.success(request, 'Order status updated successfully.')
         return redirect('order') 
-
     return redirect('admin')
 
 
@@ -1459,58 +1605,37 @@ def delete_section(request,section_id):
     return redirect('section')
 
 
-
 def mens_watches(request):
-
     mens_watches_category = Category.objects.get(category_name="Men's watch")
-    unique_colors = Product.objects.values('color').annotate(count=Count('color')).order_by('color')
-    # Filter products that belong to this category
+
+    # Fetch all products in the "mens" category
     mens_watches_products = Product.objects.filter(category=mens_watches_category)
 
-    selected_brand = request.GET.get('brand')
-    selected_color = request.GET.get('color')
-    selected_price = request.GET.get('price')
-    selected_subcategory = request.GET.get('sub_category')
+   
+    for product in mens_watches_products:
+        discounted_price = None
+        if product.category.category_offer:
+            discounted_price = product.price - mens_watches_category.category_offer
+        # Calculate offer price based on the product_offer
+        offer_price=None
+        if product.product_offer:
+            offer_price = product.price - (product.price * (product.product_offer / 100))
 
-    if selected_brand:
-        mens_watches_products = mens_watches_products.filter(product_name=selected_brand)
+        # Assign the calculated values to the product
+        product.discounted_price = discounted_price
+        product.offer_price = offer_price
 
-    if selected_color:
-        mens_watches_products = mens_watches_products.filter(color=selected_color)
-
-    
-    if selected_subcategory:
-        # Filter for products with the selected subcategory
-     mens_watches_products = mens_watches_products.filter(Sub_category__sub_category_name=selected_subcategory)
-
-
-
-    if selected_price:
-    
-        price_ranges = {
-            "price1": (0, 500),
-            "price2": (500, 1000),
-            "price3": (1000, 5000),
-            "price4": (5000, 10000),
-            "price5": (10000, 25000),
-            "price6": (25000, 50000),
-            "price7": (50000, 1000000) 
-        }
-
-        if selected_price in price_ranges:
-            price_range = price_ranges[selected_price]
-            # Filter for products with prices within the selected price range
-            mens_watches_products=  mens_watches_products.filter(price__range=price_range)
-    products = Product.objects.values('product_name').distinct()
+    # Fetch unique colors and subcategories
+    unique_colors = Product.objects.values('color').annotate(count=Count('color')).order_by('color')
     subcategories = Sub_category.objects.values('sub_category_name').distinct()
 
-    context= {'mens_watches_products': mens_watches_products,
-               'products': products,
-                'unique_colors':  unique_colors,
-                 'subcategories': subcategories
-                }
+    context = {
+        'mens_watches_products': mens_watches_products,
+        'unique_colors': unique_colors,
+        'subcategories': subcategories,
+    }
 
-    return render(request, 'mens.html',context)
+    return render(request, 'mens.html', context)
 
 def womens_watches(request):
     womens_watches_category = Category.objects.get(category_name="womens watch")
@@ -1711,14 +1836,16 @@ def search(request):
 
    
     if query:
+        # Perform a case-insensitive search on product names and descriptions
         products = Product.objects.filter(
             models.Q(product_name__icontains=query) |
             models.Q(description__icontains=query)
         )
     else:
-       
+        # If no query, return all products
         products = Product.objects.all()
 
+    # For example, you can filter products with names containing the query
     search_results = Product.objects.filter(product_name__icontains=query)
     context = {
         'products': products,
@@ -1727,6 +1854,14 @@ def search(request):
 
     return render(request, 'search.html',context)
 
+def search_suggestions(request):
+    query = request.GET.get('q', '')
+    if query:
+        products = Product.objects.filter(product_name__icontains=query)[:5]  # Limiting to 5 suggestions
+        suggestions = [product.product_name for product in products]
+        return JsonResponse(suggestions, safe=False)
+    return JsonResponse([], safe=False)
+
 
 def proceed_to_pay(request):
     cart = Cart.objects.filter(user=request.user)
@@ -1734,11 +1869,18 @@ def proceed_to_pay(request):
     shipping = 10
     subtotal=0
     for cart_item in cart:
-        itemprice=(cart_item.product.price)*(cart_item.quantity)  
-        subtotal=subtotal+itemprice
+        if cart_item.product.category.category_offer:   
+            itemprice=(cart_item.product.price - cart_item.product.category.category_offer)*(cart_item.quantity)
+            subtotal=subtotal+itemprice
+            
+        elif cart_item.product.product_offer:
+            itemprice = (cart_item.product.price - (cart_item.product.price * cart_item.product.product_offer/100)) * cart_item.quantity
+            subtotal=subtotal+itemprice
+        else:
+
+            itemprice=(cart_item.product.price)*(cart_item.quantity)  
+            subtotal=subtotal+itemprice
     for item in cart:
-       
-    
         discount = request.session.get('discount', 0)
     total=subtotal+shipping 
     if discount:
@@ -1749,48 +1891,6 @@ def proceed_to_pay(request):
 
     })
 
-
-def razor_pay(request,address_id):
-    user = request.user
-    cart_items = Cart.objects.filter(user=user)
-    
-  
-    subtotal=0
-    for cart_item in cart_items:
-        
-            
-        itemprice=(cart_item.product.price)*(cart_item.quantity)
-            
-        subtotal=subtotal+itemprice
-    shipping_cost = 10 
-    total = subtotal + shipping_cost if subtotal else 0
-    payment  =  'razorpay'
-    user     = request.user
-    cart_items = Cart.objects.filter(user=user)
-    address = Address.objects.get(id=address_id)
-
-    
-    order = Order.objects.create(
-        user          =     user,
-        address       =     address,
-        amount        =     total,
-        payment_type  =     payment,
-    )
-
-    for cart_item in cart_items:
-        product = cart_item.product
-        product.stock -= cart_item.quantity
-        product.save()
-
-        order_item = OrderItem.objects.create(
-            order         =     order,
-            product       =     cart_item.product,
-            quantity      =     cart_item.quantity,
-            image         =     cart_item.product.image  
-        )
-    
-    cart_items.delete()
-    return redirect('success')
 
 
 def wallet(request):
@@ -1859,9 +1959,6 @@ def return_order(request,id):
         usercustm.wallet_bal+=Order_item_amount
         usercustm.save()
 
-    # restock_products(order)
-    # order.status = 'returned'
-    # order.save()
     return redirect('order_details',id)
 
 
@@ -1984,4 +2081,131 @@ def delete_banner(request,banner_id):
     
     return redirect('banner')
 
-  
+
+
+# Create bar chart function
+def create_bar_chart(labels, data, title):
+    plt.figure(figsize=(8, 6))
+    plt.bar(labels, data, color='skyblue')
+    plt.xlabel('Products')
+    plt.ylabel('Amount')
+    plt.title(title)
+
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    chart_image = base64.b64encode(buffer.getvalue()).decode()
+    buffer.close()
+
+    return f'data:image/png;base64,{chart_image}'
+
+# pie chart function
+def create_pie_chart(labels, data, title):
+    plt.figure(figsize=(8, 8))
+    plt.pie(data, labels=labels, autopct='%1.1f%%', startangle=140)
+    plt.title(title)
+
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    chart_image = base64.b64encode(buffer.getvalue()).decode()
+    buffer.close()
+
+    return f'data:image/png;base64,{chart_image}'
+
+
+def report_generator(request, orders):
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4, bottomup=0)
+    c.setAuthor("Stop and shop")
+    c.setTitle("Sales report")
+
+    max_orders_per_page = 4
+    max_lines_per_page = 36
+
+    for order in orders:
+        lines = []  # Initialize lines list for each order
+
+        # Retrieve order items associated with the current order
+        order_items = OrderItem.objects.filter(order=order)
+        total_quantity = sum(item.quantity for item in order_items)
+
+        lines.append("===========================Start===========================")
+        lines.append("Order ID: {}".format(order.id))
+        lines.append("Total Quantity: {}".format(total_quantity))
+
+        if order_items.exists():
+            product_ids = []
+            product_names = []
+
+            # Loop through order items to collect product IDs and names
+            for item in order_items:
+                product_ids.append(str(item.product_id))
+                product_names.append(str(item.product.product_name))
+
+            # Display product IDs and names as comma-separated strings
+            lines.append("Product IDs: " + ", ".join(product_ids))
+            lines.append("Product Names: " + ", ".join(product_names))
+        else:
+            lines.append("Product IDs: N/A")
+            lines.append("Product Names: N/A")
+
+        lines.append("Amount: " + str(order.amount))
+
+        textob = c.beginText()
+        textob.setTextOrigin(inch, inch)
+        textob.setFont("Helvetica", 14)
+
+        line_count = 0
+        for line in lines:
+            line_count += 1
+            textob.textLine(line)
+            if line_count % max_lines_per_page == 0:
+                c.drawText(textob)
+                c.showPage()
+                textob = c.beginText()
+                textob.setTextOrigin(inch, inch)
+                textob.setFont("Helvetica", 14)
+
+        c.drawText(textob)
+        c.showPage()
+
+    c.save()
+    buf.seek(0)
+    return FileResponse(buf, as_attachment=True, filename='orders_report.pdf')
+
+def report_pdf_order(request):
+    if request.method == 'POST':
+        from_date = request.POST.get('from_date')
+        to_date = request.POST.get('to_date')
+        try:
+            from_date = datetime.strptime(from_date, '%Y-%m-%d').date()
+            to_date = datetime.strptime(to_date, '%Y-%m-%d').date()
+        except ValueError:
+            return HttpResponse('Invalid date format. Dates should be in the format YYYY-MM-DD.')
+
+        orders = Order.objects.filter(date__range=[from_date, to_date]).order_by('-id')
+        
+        if not orders:
+            return HttpResponse('No orders found for the specified date range.')
+
+        return report_generator(request, orders)
+
+    # Handle cases where the request method is not POST
+    return HttpResponse('This URL is for generating reports. Use a POST request to generate a report.')
+
+
+
+def chart_demo(request):
+    orders = Order.objects.order_by('-id')[:5]
+    labels = []
+    data = []
+    for order in orders:
+        labels.append(str(order.id))
+        data.append(order.amount)
+    context = {
+        'labels': json.dumps(labels),
+        'data': json.dumps(data),
+    }
+
+    return render(request, 'chart_demo.html', context)

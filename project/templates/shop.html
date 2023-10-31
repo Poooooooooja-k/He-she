@@ -94,8 +94,19 @@
               <a class="product-item" href="/product_details/{{prod.id}}">
                 <img src="{{ prod.image.url }}" class="img-fluid product-thumbnail" style="max-width: 200px; max-height: 200px;">
                 <h3 class="product-title">{{prod.product_name}}</h3>
-                <p class="product-description">{{prod.description}}</p>
-                <strong class="product-price">{{prod.price}}</strong>
+                <p class=" text-muted product-description">{{prod.description}}</p>
+               
+				{% if prod.discounted_price %}
+				        <strong class="text-dark ml-2"><del>₹{{ prod.price }}</del></strong>
+						<h6 class="text-success">₹{{ prod.discounted_price }}</h6>
+						
+					{% elif prod.offer_price %}
+					<strong class="text-dark ml-2"><del>₹{{ prod.price }}</del></strong>
+						<h6 class="text-success">₹{{ prod.offer_price }}</h6>
+						
+					{% else %}
+					<strong class="product-price">₹{{prod.price}}</strong>
+					{% endif %}
               </a>
             </div>
           {% endfor %} 

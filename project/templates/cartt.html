@@ -48,7 +48,16 @@
                   <td class="product-name">
                     <h2 class="h5 text-black">{{ prod.product.product_name }}</h2>
                   </td>
-                  <td>₹{{ prod.product.price }}</td>
+                  <td>
+                    {% if prod.product.category.category_offer %}
+                        ₹{{ prod.product.price }} - ₹{{ prod.product.category.category_offer }}
+
+                    {% elif prod.product.product_offer %}
+                        ₹{{ prod.product.price }} 
+                    {% else %}
+                        ₹{{ prod.product.price }}
+                    {% endif %}
+                  </td>
                   <td>
                     <div class="input-group mb-3" style="max-width: 120px;">
                         <div class="input-group-prepend">
