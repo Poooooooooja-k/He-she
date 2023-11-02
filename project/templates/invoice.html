@@ -67,7 +67,7 @@
 
                 <div class="to">
                     <strong>shipping Address:</strong>
-                    <P>{{ address.house_no }}</P>
+                    <P>{{ address }}</P>
                 </div>
             </div>
             <table>
@@ -76,22 +76,24 @@
                         <th>Product</th>
                         <th>Quantity</th>
                         <th>Price</th>
+                        <th>Payment type</th>
                         <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for i in cart_items %}
                     <tr>
-                        <td>i.product.product_name</td>
-                        <td>i.quantity</td>
-                        <td>i.product.price</tr>
+                        <td>{{ item.product.product_name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.product.price }}</td>
+                        <td>{{ order.payment_type }}</td>
+                        <td>{{ order.amount }}</td>
                     </tr>
-                    {% endfor %}
                 </tbody>
             </table>
             <div class="invoice-total">
-                <strong>Sub total:</strong>  ${{ subtotal }}
-                <strong>Total Amount:</strong> ${{ total }}
+                <strong>Sub total:</strong>  ${{item.product.price }}
+                <br>
+                <strong>Total Amount:</strong> ${{ order.amount }}
             </div>
         </main>
     </div>

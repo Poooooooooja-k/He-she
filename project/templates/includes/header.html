@@ -1,33 +1,35 @@
 {% load static %}
 <style>
     .search-suggestions {
-    width: calc(100% - 40px);  /* Width of search bar minus button width */
-    max-height: 200px;  /* Optional: Set a maximum height */
-    overflow-y: auto;  /* Add a scrollbar if the suggestions exceed max-height */
-    position: absolute;  /* To position it directly below the search input */
-    top: 100%;  /* Push it down to be under the input */
-    left: 0;  /* Align it to the left side of the search input */
-    z-index: 1;  /* To ensure it shows above other elements */
-    background-color: white;  /* Background color for the suggestion box */
-    border: 1px solid #ccc;  /* Border around the suggestion box */
-    border-top: none;  /* Remove top border to merge with search bar */
-}
+		width: calc(100% - 40px);
+		max-height: 200px;
+		overflow-y: auto;
+		position: absolute;
+		top: 100%;
+		left: 0;
+		z-index: 1000;
+		background-color: white;
+		border: 1px solid #ccc;
+		border-top: none;
+	}
+	
+	.search-suggestions div {
+		padding: 10px;
+		cursor: pointer;
+		border-bottom: 1px solid #eaeaea;
+	}
+	
+	.search-suggestions div:last-child {
+		border-bottom: none;
+	}
+	
+	.search-suggestions div:hover {
+		background-color: #f6f6f6;
+	}  /* Change background on hover for better UX */
 
-.search-suggestions div {
-    padding: 10px;  /* Space inside each suggestion */
-    cursor: pointer;  /* Change cursor to indicate clickable */
-    border-bottom: 1px solid #eaeaea;  /* Border between suggestions */
-}
-
-.search-suggestions div:last-child {
-    border-bottom: none;  /* Remove border from the last suggestion */
-}
-
-.search-suggestions div:hover {
-    background-color: #f6f6f6;  /* Change background on hover for better UX */
-}
 
 </style>
+
 		<!-- Start Header/Navigation -->
 		<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" style="background-color: black !important;" arial-label="Furni navigation bar">
 
@@ -61,7 +63,8 @@
 						<div class="col-lg-6 col-6 text-left" style="width: 500px;margin-left:50px;">
 							<form method="get" action="{% url 'search' %}">
 								<div class="input-group">
-									<input type="text" class="form-control" name="q" placeholder="Search for products">
+									<input type="text" class="form-control" id= "searchInput" name="q" placeholder="Search for products">
+									<div id="suggestionBox" class="search-suggestions"></div>
 									<div class="input-group-append">
 										<button type="submit" class="btn btn-warning" style="width: 40px !important;">
 											<i class="fa fa-search"></i>
@@ -76,12 +79,9 @@
 
 				<script>
 					document.addEventListener("DOMContentLoaded", function() {
-						const searchInput = document.querySelector('input[name="q"]');
-						const suggestionBox = document.createElement('div');
-						suggestionBox.className = 'search-suggestions';
-						searchInput.parentNode.parentNode.appendChild(suggestionBox);
-				
-				
+						const searchInput = document.getElementById('searchInput');
+						const suggestionBox = document.getElementById('suggestionBox');
+					
 						searchInput.addEventListener('input', function() {
 							fetch(`/search-suggestions/?q=${this.value}`)
 							.then(response => response.json())
@@ -92,14 +92,14 @@
 									div.innerText = item;
 									div.addEventListener('click', function() {
 										searchInput.value = this.innerText;
-										suggestionBox.innerHTML = '';  // Clear the suggestions when one is clicked
+										suggestionBox.innerHTML = '';
 									});
 									suggestionBox.appendChild(div);
 								});
 							});
 						});
 					});
-				</script>
+				</script>				
 			</div>			
 		</nav>
 

@@ -31,6 +31,11 @@ from email.mime.base import MIMEBase
 from email import encoders
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa 
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 
 import io
 # Create your views here.
@@ -1962,35 +1967,81 @@ def return_order(request,id):
     return redirect('order_details',id)
 
 
-def invoice(request,id):
-    buf= io.BytesIO()
-    c= canvas.Canvas(buf,pagesize=letter, bottomup=0)
-    textob=c.beginText()
-    textob.setTextOrigin(inch,inch)
-    textob.setFont("Helvetica",14)
-    orders = Order.objects.filter(id=id)
-    order_items = OrderItem.objects.filter(order=id)
-    lines = []
-    lines.append("Stop & Shop")    
-    lines.append("Invoice:")    
-    for o in orders:
-        for i in order_items:
-            lines.append(f"Name: {o.user.name}")
-            lines.append(f"Product: {i.product.product_name}")
-            lines.append(f"Quantity: {i.quantity}")
-            lines.append(f"Price: {i.product.price}")
-            lines.append(f"Payment Type: {o.payment_type}")
-            lines.append(f"Amount: {o.amount}")
-            lines.append("")
-    for line in lines:
-        textob.textLine(line)
-    c.drawText(textob)
-    c.showPage()
-    c.save()
-    buf.seek(0)
+# def invoice(request,id):
+#     buf= io.BytesIO()
+#     c= canvas.Canvas(buf,pagesize=letter, bottomup=0)
+#     textob=c.beginText()
+#     textob.setTextOrigin(inch,inch)
+#     textob.setFont("Helvetica",14)
+#     orders = Order.objects.filter(id=id)
+#     order_items = OrderItem.objects.filter(order=id)
+#     lines = []
+#     lines.append("Stop & Shop")    
+#     lines.append("Invoice:")    
+#     for o in orders:
+#         for i in order_items:
+#             lines.append(f"Name: {o.user.name}")
+#             lines.append(f"Product: {i.product.product_name}")
+#             lines.append(f"Quantity: {i.quantity}")
+#             lines.append(f"Price: {i.product.price}")
+#             lines.append(f"Payment Type: {o.payment_type}")
+#             lines.append(f"Amount: {o.amount}")
+#             lines.append("")
+#     for line in lines:
+#         textob.textLine(line)
+#     c.drawText(textob)
+#     c.showPage()
+#     c.save()
+#     buf.seek(0)
         
-    return FileResponse(buf,as_attachment=True,filename='invoice.pdf')
+#     return FileResponse(buf,as_attachment=True,filename='invoice.pdf')
 
+
+def invoice(request, id):
+    # 1. Fetch the order and items
+    orders = Order.objects.filter(id=id)
+    address = Address.objects.get(order=id)
+    order_items = OrderItem.objects.filter(order=id)
+
+    for order in orders:
+        for item in order_items:
+            # 2. Render the order and items to an HTML template
+            rendered = render_to_string('invoice.html', {'order': order, 'item': item})
+
+            # 3. Convert the rendered HTML to PDF
+            output = io.BytesIO()
+            pdf = pisa.CreatePDF(rendered, output)
+            pdf_data = output.getvalue()
+
+            # 4. Send the PDF as an email attachment
+            msg = MIMEMultipart()
+            msg['From'] = 'heandshe2206@gmail.com'
+            msg['To'] = order.user.email
+            msg['Subject'] = 'Invoice from he & She'
+
+
+            attachment = MIMEBase('application', 'octet-stream')
+            attachment.set_payload(pdf_data)
+            encoders.encode_base64(attachment)
+            attachment.add_header('Content-Disposition', 'attachment; filename=invoice.pdf')
+            msg.attach(attachment)
+
+            try:
+                smtp_server = 'smtp.gmail.com'
+                smtp_port = 587
+                smtp_username = 'heandshe2206@gmail.com'
+                smtp_password = 'nyxbksyvujbbkmdh'
+
+                server = smtplib.SMTP(smtp_server, smtp_port)
+                server.starttls()
+                server.login(smtp_username, smtp_password)
+                server.sendmail(msg['From'], msg['To'], msg.as_string())
+                server.quit()
+
+            except Exception as e:
+                return HttpResponse(f'Email sending failed: {str(e)}')
+
+    return HttpResponse('Emails sent successfully!')
 
 
 
