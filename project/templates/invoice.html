@@ -64,18 +64,46 @@
                     hostoke village<br>
                     Bengaluru,Karnataka,India 560067<br>
                 </div>
-
-                <div class="to">
-                    <strong>shipping Address:</strong>
-                    <P>{{ address }}</P>
-                </div>
             </div>
+                <table border="1" cellspacing="0" cellpadding="8" style="width: 100%; border-collapse: collapse;">
+                    <colgroup>
+                    <col span="1" style="width: 30%;">
+                    <col span="1" style="width: 70%;">
+                    </colgroup>
+                    <tr>
+                        <td><strong>Name</strong></td>
+                        <td>{{address.full_name}}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong>House No. & Street</strong></td>
+                        <td>{{address.house_no}} {{address.street}}</td>
+                    </tr>
+                
+                    <tr>
+                        <td><strong>City & Postal Code</strong></td>
+                        <td>{{address.city}}, {{address.post_code}}</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong>State</strong></td>
+                        <td>{{address.state}}</td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Phone No.</strong></td>
+                        <td>{{address.phone_no}}</td>
+                    </tr>
+                </table>
+
+
             <table>
                 <thead>
                     <tr>
                         <th>Product</th>
                         <th>Quantity</th>
                         <th>Price</th>
+                        <!-- <th>Discount</th> -->
                         <th>Payment type</th>
                         <th>Total</th>
                     </tr>
@@ -91,10 +119,11 @@
                 </tbody>
             </table>
             <div class="invoice-total">
-                <strong>Sub total:</strong>  ${{item.product.price }}
+                <!-- <strong>Sub total:</strong>  ${{subtotal}} -->
                 <br>
                 <strong>Total Amount:</strong> ${{ order.amount }}
             </div>
+            <h2 class="display-3 text-primary" style="text-align:center;">Thank you for Purchasing with us!</h2>
         </main>
     </div>
 </body>

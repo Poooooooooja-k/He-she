@@ -50,7 +50,7 @@
                   </td>
                   <td>
                     {% if prod.product.category.category_offer %}
-                        ₹{{ prod.product.price }} - ₹{{ prod.product.category.category_offer }}
+                        ₹{{ prod.product.price }} - {{ prod.product.category.category_offer }}%
 
                     {% elif prod.product.product_offer %}
                         ₹{{ prod.product.price }} 

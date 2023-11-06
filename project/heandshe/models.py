@@ -131,17 +131,6 @@ class Wishlist(models.Model):
     def __str__(self):
         return f"Wishlist:{self.user.name}-{self.product}"
 
-    
-# class ProductVariation(models.Model):
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-#     color   = models.CharField(max_length=50)
-#     Brand   =models.CharField(max_length=100,null=True,blank=True)
-#     price   = models.DecimalField(max_digits=10, decimal_places=2)
-#     image   =models.ForeignKey(Images,on_delete=models.CASCADE,null=True,blank=True)
-#     stock  =models.IntegerField(default=0)
-
-#     def __str__(self):
-#         return f"{self.product.product_name} - {self.size} - {self.color}"
 
 class Cart(models.Model):
     user           =     models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True,blank=True)
@@ -193,9 +182,8 @@ class OrderItem(models.Model):
     quantity       =   models.IntegerField(default=1)
     image          =   models.ImageField(upload_to='products', null=True, blank=True)
 
-    def _str_(self):
-        return str(self.id)
-    
+    def __str__(self):
+        return self.product.product_name if self.product else "N/A"
 
 
 class Coupon(models.Model):

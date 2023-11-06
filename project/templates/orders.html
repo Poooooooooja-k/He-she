@@ -165,7 +165,7 @@
                                         <td>
                                             <form action="{% url 'update_order' %}" method="POST">
                                                 {% csrf_token %}
-                                                <select name="status" id="status">
+                                                <select name="status" class="status-select">
                                                     <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
                                                     <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Processing</option>
                                                     <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
@@ -177,7 +177,9 @@
                                                     <option value="on_hold" {% if order.status == 'on_hold' %}selected{% endif %}>On Hold</option>
                                                 </select>
                                                 <input type="hidden" name="order_id" value="{{ order.id }}">
-                                                <button style="color: green;" type="submit">Update</button>
+                                                <button type="submit" {% if order.status == 'cancelled' %}disabled style="color: grey;"{% else %}style="color: green;"{% endif %}>Update</button> 
+
+                                            </form>
                                             </form>
                                         </td>
                                     </tr> 
@@ -225,8 +227,6 @@
                   </div>
                 </div>
               </div>     
-
-
               
             <!-- Footer Start -->
             <div class="container-fluid pt-4 px-4">
