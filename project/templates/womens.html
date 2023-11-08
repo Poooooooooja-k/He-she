@@ -95,7 +95,15 @@
                                     <img src="{{ product.image.url }}" class="img-fluid product-thumbnail" style="max-width: 200px; max-height: 200px;">
                                     <h3 class="product-title">{{ product.product_name}}</h3>
                                     <p class=" text-muted product-description">{{product.description}}</p>
-                                    <strong class="product-price">{{product.price}}</strong>
+                                    {% if product.discounted_price %}
+                                    <strong class="text-dark ml-2"><del>₹{{ product.price }}</del></strong>
+                                    <h6 class="text-success">₹{{ product.discounted_price }}</h6>
+                                {% elif product.offer_price %}
+                                    <strong class="text-dark ml-2"><del>₹{{ product.price }}</del></strong>
+                                    <h6 class="text-success">₹{{ product.offer_price }}</h6>
+                                {% else %}
+                                    <strong class="product-price">₹{{ product.price }}</strong>
+                                {% endif %}
                                 </a>
                             </div>
                         {% endfor %}

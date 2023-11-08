@@ -37,7 +37,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 from django.contrib import messages
-
+from django.core.mail import send_mail
+from email.mime.text import MIMEText
+import traceback
 import io
 # Create your views here.
 
@@ -337,17 +339,17 @@ def edit_category(request, category_id):
         return render(request, 'edit_category.html', context)
     else:
         return redirect ('admin')
-    
+
 def delete_category(request, category_id):
     try:
         category = Category.objects.get(id=category_id)
     except Category.DoesNotExist:
-        return render(request, 'category_not_found.html')
+        return HttpResponse("Category does not exist")
     category.delete()
     categories = Category.objects.all()
     context = {'categories': categories}
+    return render(request, 'category.html', context)
 
-    return redirect('category',context)
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache  
@@ -571,7 +573,7 @@ def userproductpage(request,id):
     discounted_price = None
     offer_price = None
     if product.category.category_offer:
-        discounted_price = product.price - product.category.category_offer
+        discounted_price = (product.price - (product.price*product.category.category_offer/100))
     product.discounted_price = discounted_price
     if product.product_offer:
         offer_price        = product.price -(product.price * product.product_offer/100)
@@ -597,7 +599,7 @@ def shop(request):
     for product in products:
         discounted_price = None
         if product.category.category_offer:
-            discounted_price = product.price - product.category.category_offer
+            discounted_price = (product.price - (product.price*product.category.category_offer/100))
         product.discounted_price = discounted_price
         offer_price = None
         if product.product_offer:
@@ -810,7 +812,6 @@ def cartt(request):
             cart_item.quantity = cart_item.product.stock
             cart_item.save()
             item_price = Decimal(0)  # Initialize item price as a Decimal
-
         if cart_item.product.category.category_offer:
             item_price = (cart_item.product.price - (cart_item.product.price*cart_item.product.category.category_offer/100)) * cart_item.quantity
             total_dict[cart_item.id] = item_price
@@ -892,7 +893,6 @@ def check_out(request):
     cart_items = Cart.objects.filter(user=user)
     subtotal = 0
     for cart_item in cart_items:
-       
         if cart_item.product.category.category_offer:
             item_price = (cart_item.product.price - (cart_item.product.price*cart_item.product.category.category_offer/100)) * cart_item.quantity
             subtotal += item_price
@@ -1296,7 +1296,8 @@ def mens_watches(request):
     for product in mens_watches_products:
         discounted_price = None
         if product.category.category_offer:
-            discounted_price = product.price - mens_watches_category.category_offer
+          if product.category.category_offer:
+            discounted_price = (product.price - (product.price*product.category.category_offer/100))
         # Calculate offer price based on the product_offer
         offer_price=None
         if product.product_offer:
@@ -1347,6 +1348,17 @@ def womens_watches(request):
     unique_colors = Product.objects.values('color').annotate(count=Count('color')).order_by('color')
     products = Product.objects.values('product_name').distinct()
     subcategories = Sub_category.objects.values('sub_category_name').distinct()
+    for product in womens_watches_products:
+        discounted_price = None
+        if product.category.category_offer:
+          if product.category.category_offer:
+            discounted_price = (product.price - (product.price*product.category.category_offer/100))
+        # Calculate offer price based on the product_offer
+        offer_price=None
+        if product.product_offer:
+            offer_price = product.price - (product.price * (product.product_offer / 100))
+        product.discounted_price = discounted_price
+        product.offer_price = offer_price
     context = {
         'womens_watches_products': womens_watches_products,
         'products': products,
@@ -1399,6 +1411,14 @@ def apply_coupon(request):
                 messages.warning(request, f"{cart_item.product.product_name} is out of stock.")
                 cart_item.quantity = cart_item.product.stock
                 cart_item.save()
+            if cart_item.product.category.category_offer:
+                item_price = (cart_item.product.price - (cart_item.product.price*cart_item.product.category.category_offer/100)) * cart_item.quantity
+                total_dict[cart_item.id] = item_price
+                subtotal += item_price
+            elif cart_item.product.product_offer:
+                item_price = (cart_item.product.price - (cart_item.product.price * cart_item.product.product_offer/100)) * cart_item.quantity
+                total_dict[cart_item.id] = item_price
+                subtotal += item_price
             else:
                 item_price = cart_item.product.price * cart_item.quantity
                 total_dict[cart_item.id] = item_price
@@ -1792,7 +1812,7 @@ def contact(request):
     context = {}  
     if request.method=='POST':
         user=request.user
-        message = request.POST.get('message', '')
+        message = request.POST.get('message')
         
         # Save the message to the database
         contact = Contact(user=user,message=message)
@@ -1801,3 +1821,45 @@ def contact(request):
 
         return redirect('contact') 
     return render(request,'contact.html',context)
+
+
+
+def adminside_message(request):
+    customer_messages=Contact.objects.all()
+    context={
+        'customer_messages':customer_messages
+    }
+    return render(request,'adminside_message.html',context)
+
+
+def reply(request):
+    if request.method == 'POST':
+        user_email = request.POST.get('email')
+        message_content = request.POST.get('message')
+
+        subject = 'Reply from Our Site'
+        from_email = 'heandshe2206@gmail.com'
+        to_email = user_email
+
+        # Create the MIME message
+        msg = MIMEMultipart()
+        msg['From'] = from_email
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(message_content, 'plain'))
+
+        # try:
+        smtp_server = 'smtp.gmail.com'
+        smtp_port = 587
+        smtp_username = 'heandshe2206@gmail.com'
+        smtp_password = 'nyxbksyvujbbkmdh'
+        # Connect to the server and send the email
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        server.send_message(msg)
+        server.quit()
+
+    messages.success(request, 'Email sent successfully.')
+    return redirect('adminside_message')
+ 

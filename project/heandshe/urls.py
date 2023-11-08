@@ -148,8 +148,12 @@ urlpatterns=[
     path('report-pdf-order/', views.report_pdf_order, name='report_pdf_order'),
     path('chart-demo/', views.chart_demo, name='chart_demo'),
     path('report_generator/<int:id/',views.report_generator,name='report_generator'),
-
+     
+    # contact
     path('contact/',views.contact,name='contact'),
+    path('adminside_message/',views.adminside_message,name='adminside_message'),
+    path('reply/',views.reply,name='reply'),
+  
 
 ]
 if settings.DEBUG:

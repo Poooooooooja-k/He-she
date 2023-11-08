@@ -98,7 +98,8 @@ class Product(models.Model):
     image           = models.ImageField(upload_to='products/' , blank=True , null= True)
     section         =models.ForeignKey(Section,on_delete=models.CASCADE,blank=True,null=True)
     color          =models.CharField(max_length=100,null=True,blank=True)
-    product_offer  =models.PositiveBigIntegerField(default=0)
+    product_offer = models.DecimalField(max_digits=5, decimal_places=2,max_length=100, blank=True, null=True)
+
 
     def __iter__(self):
         yield self.id
@@ -218,4 +219,5 @@ class Banner(models.Model):
 
 class Contact(models.Model):
     user  =models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True,blank=True)
-    message=models.CharField(max_length=1000)
+    message = models.CharField(max_length=1000, null=True, blank=True)
+

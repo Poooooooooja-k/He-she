@@ -26,6 +26,14 @@
           {% for i in orders %}
           <a href="{% url 'invoice' i.id %}" class="btn btn-sm btn-outline-black"><button>Sent Invoice</button></a>
           {% endfor %}
+          
+          {% if messages %}
+          <ul class="messages" style="color: green;" >
+              {% for message in messages %}
+                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+              {% endfor %}
+          </ul>
+         {% endif %}
         </div>
       </div>
     </div>
