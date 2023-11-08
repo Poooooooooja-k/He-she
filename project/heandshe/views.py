@@ -36,7 +36,7 @@ from xhtml2pdf import pisa
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
-from django.urls import reverse
+from django.contrib import messages
 
 import io
 # Create your views here.
@@ -97,7 +97,6 @@ def adminlogin(request):
 @never_cache
 def dashboard(request):
     if 'admin' in request.session:
-        # Retrieve data for products (assuming you have a model named Product)
         products = Product.objects.order_by('-id')[:5]
         # Process product data for bar chart (order distribution)
         order_labels = [f'Order {product.id}' for product in products]
@@ -1046,7 +1045,6 @@ def restock_products(order):
         product.save()
     
 # admin side order
-
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache     
 def order(request):
@@ -1356,9 +1354,6 @@ def womens_watches(request):
         'subcategories': subcategories,
     }
     return render(request, 'womens.html', context)
-
-def contact(request):
-    return render(request,'contact.html')
 
 #coupon
 @never_cache
@@ -1791,3 +1786,18 @@ def chart_demo(request):
         'data': json.dumps(data),
     }
     return render(request, 'chart_demo.html', context)
+
+
+def contact(request):
+    context = {}  
+    if request.method=='POST':
+        user=request.user
+        message = request.POST.get('message', '')
+        
+        # Save the message to the database
+        contact = Contact(user=user,message=message)
+        contact.save()
+        messages.success(request,'Thank you for contacting us!')
+
+        return redirect('contact') 
+    return render(request,'contact.html',context)

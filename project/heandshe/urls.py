@@ -149,6 +149,8 @@ urlpatterns=[
     path('chart-demo/', views.chart_demo, name='chart_demo'),
     path('report_generator/<int:id/',views.report_generator,name='report_generator'),
 
+    path('contact/',views.contact,name='contact'),
+
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

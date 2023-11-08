@@ -216,4 +216,6 @@ class Banner(models.Model):
     description     =models.CharField(max_length=100)
     
 
-
+class Contact(models.Model):
+    user  =models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True,blank=True)
+    message=models.CharField(max_length=1000)

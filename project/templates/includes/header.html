@@ -47,19 +47,23 @@
 						</li>
 						<li><a class="nav-link" href="{% url 'mens' %}">Men</a></li>
 						<li><a class="nav-link" href="{% url 'womens' %}">Women</a></li>
+						{% if user.is_authenticated %}
 						<li><a class="nav-link" href="{% url 'wishlist' %}">Wishlist</a></li>
+						{% endif %}
 						<li><a class="nav-link" href="{% url 'shop' %}">Shop</a></li>
 						<li><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
 					</ul>
 
 					<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
 						{% if user.is_authenticated %}
+						<!-- <li style="color: white;" margin-top="10px;">Hello, {{ user.name }}</li> -->
 						<li><a class="nav-link" href="{% url 'profile' %}"><img src="{% static 'images/user.svg' %}" alt="profile"></a></li>
 						{% else %}
 						<li><a class="nav-link" href="{% url 'signup' %}"><img src="{% static 'images/user.svg' %}" alt="Signup"></a></li>
 						{% endif %}
-					
+						{% if user.is_authenticated %}
 						<li><a class="nav-link" href="{% url 'cartt' %}"><img src="{% static 'images/cart.svg' %}" alt="Cart"></a></li>
+						{% endif %}
 						<div class="col-lg-6 col-6 text-left" style="width: 500px;margin-left:50px;">
 							<form method="get" action="{% url 'search' %}">
 								<div class="input-group">
