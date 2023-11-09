@@ -941,8 +941,7 @@ def shipping_address(request):
             phone_no = phone_no,
             city = city,
         )
-        address.save()
-        return redirect('add_address')
+        return redirect('check_out')
     else:
         return render(request, 'check_out.html')
     
@@ -953,14 +952,14 @@ def razor_pay(request,address_id):
     subtotal=0
     for cart_item in cart_items:
         if cart_item.product.category.category_offer:
-            itemprice=(cart_item.product.price -( cart_item.product.price*cart_item.product.category.category_offer/100))*cart_item.quantity
-            subtotal=subtotal+itemprice
+            item_price = (cart_item.product.price - (cart_item.product.price*cart_item.product.category.category_offer/100)) * cart_item.quantity
+            subtotal += item_price
         elif cart_item.product.product_offer:
             itemprice =  (cart_item.product.price - (cart_item.product.price * cart_item.product.product_offer/100)) * cart_item.quantity
-            subtotal=subtotal+itemprice    
-        else:
-            itemprice=(cart_item.product.price)*(cart_item.quantity)  
             subtotal=subtotal+itemprice
+        else:
+            itemprice = (cart_item.product.price) * (cart_item.quantity)
+            subtotal = subtotal + itemprice
     shipping_cost = 10 
     total = subtotal + shipping_cost if subtotal else 0
     discount = request.session.get('discount', 0)
@@ -995,8 +994,15 @@ def order_placed(request):
     cart_items = Cart.objects.filter(user=user)
     subtotal=0
     for cart_item in cart_items:
-        itemprice=(cart_item.product.price)*(cart_item.quantity)
-        subtotal=subtotal+itemprice
+        if cart_item.product.category.category_offer:
+            item_price = (cart_item.product.price - (cart_item.product.price*cart_item.product.category.category_offer/100)) * cart_item.quantity
+            subtotal += item_price
+        elif cart_item.product.product_offer:
+            itemprice =  (cart_item.product.price - (cart_item.product.price * cart_item.product.product_offer/100)) * cart_item.quantity
+            subtotal=subtotal+itemprice
+        else:
+            itemprice = (cart_item.product.price) * (cart_item.quantity)
+            subtotal = subtotal + itemprice
     shipping_cost = 10 
     total = subtotal + shipping_cost if subtotal else 0
     discount = request.session.get('discount', 0)
@@ -1527,15 +1533,15 @@ def proceed_to_pay(request):
     shipping = 10
     subtotal=0
     for cart_item in cart:
-        if cart_item.product.category.category_offer:   
-            itemprice=(cart_item.product.price - cart_item.product.category.category_offer)*(cart_item.quantity)
-            subtotal=subtotal+itemprice
+        if cart_item.product.category.category_offer:
+            item_price = (cart_item.product.price - (cart_item.product.price*cart_item.product.category.category_offer/100)) * cart_item.quantity
+            subtotal += item_price
         elif cart_item.product.product_offer:
-            itemprice = (cart_item.product.price - (cart_item.product.price * cart_item.product.product_offer/100)) * cart_item.quantity
+            itemprice =  (cart_item.product.price - (cart_item.product.price * cart_item.product.product_offer/100)) * cart_item.quantity
             subtotal=subtotal+itemprice
         else:
-            itemprice=(cart_item.product.price)*(cart_item.quantity)  
-            subtotal=subtotal+itemprice
+            itemprice = (cart_item.product.price) * (cart_item.quantity)
+            subtotal = subtotal + itemprice
     for item in cart:
         discount = request.session.get('discount', 0)
     total=subtotal+shipping 
@@ -1837,7 +1843,7 @@ def reply(request):
         user_email = request.POST.get('email')
         message_content = request.POST.get('message')
 
-        subject = 'Reply from Our Site'
+        subject = 'Message from He & She'
         from_email = 'heandshe2206@gmail.com'
         to_email = user_email
 
