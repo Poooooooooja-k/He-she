@@ -53,8 +53,8 @@ def base(request):
 def home(request):
     if 'admin' in request.session:
         return redirect('dashboard')
-    section = Section.objects.filter(id=4).first()
-    product = Product.objects.filter(section_id=4)
+    section = Section.objects.filter(id=1).first()
+    product = Product.objects.filter(section_id=1)
     banner = Banner.objects.all()
     search_query = request.GET.get('q')
     if search_query:
