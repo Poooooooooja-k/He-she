@@ -193,9 +193,18 @@ class Coupon(models.Model):
     discount_price  =  models.PositiveIntegerField(default=100)
     minimum_amount  =  models.PositiveIntegerField(default=500)
     expiry_date     =  models.DateField(null=True,blank=True)
+    user            =  models.ManyToManyField(CustomUser,blank=True)
 
     def __str__(self):
         return self.coupon_code
+
+class UsedCoupon(models.Model):
+    user        =models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    coupon      =models.ForeignKey(Coupon,on_delete=models.CASCADE)
+    is_used = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.name} - {self.coupon.coupon_code}"
 
 class Wallet(models.Model):
     user  =models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True,blank=True)
