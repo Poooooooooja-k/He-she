@@ -100,7 +100,7 @@ def adminlogin(request):
 @never_cache
 def dashboard(request):
     if 'admin' in request.session:
-        products = Product.objects.order_by('-id')[:5]
+        products = Product.objects.order_by('-id')
         # Process product data for bar chart (order distribution)
         order_labels = [f'Order {product.id}' for product in products]
         order_amounts = [product.price for product in products]  # Use any field you want for the order amount
