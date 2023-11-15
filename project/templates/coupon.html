@@ -153,7 +153,6 @@
                                         <th scope="col">Coupon code</th>
                                         <th scope="col">Discount price</th>
                                         <th scope="col">Minimum amount</th>
-                                        <th scope="col">Expiry Date</th>
                                         <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
@@ -163,7 +162,6 @@
                                         <td>{{ coupon.coupon_code }}</td>
                                         <td>{{ coupon.discount_price }}</td>
                                         <td>{{ coupon.minimum_amount }}</td>
-                                        <td>{{ coupon.expiry_date }}</td>
                                         <td>
                                             <a href="{% url 'edit_coupon' id=coupon.id %}" class="edit"><i class="material-icons" title="Edit">&#xE254;</i></a>
                                             <a href="#" class="delete" data-toggle="modal" data-target="#deleteModal{{ coupon.id }}"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
@@ -207,12 +205,6 @@
                     <label>Minimum Amount</label>
                     <input class="form-control" type="text" placeholder="" name="amount">
                 </div>
-                <div class="col-md-6 form-group">
-                    <label>Expiry date</label>
-                    <input class="form-control" type="date" placeholder="" name="date">
-                </div>
-              
-              
             <div class="modal-footer">
                 <button type="submit" class="btn btn-success">Save</button>
             </div>
