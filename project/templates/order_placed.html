@@ -22,10 +22,7 @@
           <a href="{% url 'shop' %}" class=" btn-sm btn-outline-black"><button>continue shopping</button></a>
           
           <a href="{% url 'customer_order' %}" class=" btn-sm btn-outline-black"><button>order details</button></a>
-          
-          {% for i in orders %}
-          <a href="{% url 'invoice' i.id %}" class="btn btn-sm btn-outline-black"><button>Sent Invoice</button></a>
-          {% endfor %}
+
           
           {% if messages %}
           <ul class="messages" style="color: green;" >

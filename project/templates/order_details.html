@@ -15,9 +15,9 @@
             <p>Quantity: {{j.quantity}}</p>
             <p>Order Date:{{i.date}}</p>
             <p>Expected Delivery: DD/MM/YYYY</p>
-            
             <hr>
             {% endfor %}
+           
             <div>
                 {% if i.status == 'cancelled' %}
                 <label style="color:red">Order cancelled</label>
@@ -50,7 +50,10 @@
                 <p>Phone No:{{i.address.phone_no}}</p>
             </div>
         </div>
-        
+         
+        {% for i in orders %}
+        <a href="{% url 'invoice' i.id %}" class="btn btn-sm btn-outline-black"><button>Sent Invoice</button></a>
+        {% endfor %}
         {% endfor %}
         {% comment %} {% endfor %} {% endcomment %}
     </div>

@@ -41,6 +41,7 @@ from django.core.mail import send_mail
 from email.mime.text import MIMEText
 import traceback
 import io
+import re
 from django.db.models import Q
 # Create your views here.
 
@@ -183,6 +184,15 @@ def signup(request):
         elif password != confirmpassword:
             messages.info(request,"PAssword Missmatch")
             return redirect('signup')
+        elif not is_valid_password(password):
+            messages.error(request,"password should contain atleast one capital,one special character,one number and have least of 8 characters")
+            return redirect('signup')
+        elif not validate_email(email):
+            messages.error(request, "Please enter a valid email address")
+            return redirect('signup')
+        elif not validate_number(phone_number):
+            messages.error(request, "Please enter a valid mobile number")
+            return redirect('signup')
         else:
             if CustomUser.objects.filter(email = email).exists():
                 messages.info(request,"Email Already Taken")
@@ -212,8 +222,25 @@ def signup(request):
         return redirect('verify_signup')
     return render(request,'signup.html')
 
-    
+  
+def validate_email(email):
+    return "@" in email and "." in email
 
+
+def validate_number(number):
+    pattern = r"^\d{10}$"
+    if re.match(pattern, number):
+        return True
+    else:
+        return False
+
+def is_valid_password(password):
+    pattern = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
+    if re.match(pattern, password):
+        return True
+    else:
+        return False
+  
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache
 def verify_signup(request):
