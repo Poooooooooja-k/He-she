@@ -119,12 +119,8 @@
                         <div>
                             <!-- <a href="#addEmployeeModal" class="btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Add New Product</span></a> -->
                             <a href="{% url 'add_product' %}" class="btn btn-success">Add Product</a>
-
-
                         </div>
                     </div>
-
-                    
                     <div class="table-responsive">
                         <table class="table text-start align-middle table-bordered table-hover mb-0">
                             <thead>
@@ -137,13 +133,8 @@
                                     <th scope="col">Offer</th>
                                     <th scope="col">Price</th>
                                     <th scope="col">section</th>
-                                    
                                     <th scope="col">color</th>
-                                   
-                                    <!-- <th scope="col">Offer %</th> -->
-                                    
                                     <th scope="col">Images</th>
-                                   
                                     <th scope="col">Actions</th>
                                 </tr>
                             </thead>
@@ -161,19 +152,23 @@
                                     <td>{{ product.section }}</td>
                                     <td>{{ product.color }}</td>
                                     <td><img src="{{product.image.url}}" alt="" width="100" height="100"></td>
-                                  
-                                   
                                     <td>
                                         <a href="{% url 'edit_product' product_id=product.id %}" class="edit" data-toggle="modal">
                                             <i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i>
                                         </a>
-                                        <a href="#" class="delete" data-toggle="modal" data-target="#deleteModal{{ product.id }}">
-                                            <i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
-                                        </a>
+                                        {% if not product.deleted %}
+                                            <a href="" class="delete" data-toggle="modal" data-target="#deleteModal{{ product.id }}">
+                                                <i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'restore_product' product_id=product.id %}" class="restore" data-toggle="tooltip" title="Restore">
+                                                <i class="material-icons" title="Restore">restore</i>
+                                            </a>
+                                            <br><span style="color:red;"class="soft-deleted-label">Soft Deleted</span>
+                                       {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %} 
-
                             </tbody>
                         </table>
                         <!-- Pagination -->
@@ -182,9 +177,7 @@
                             <a href="?page=1">&laquo; First</a>
                             <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
                             {% endif %}
-                    
                             <span class="current-page">{{ page_obj.number }}</span>
-                    
                             {% if page_obj.has_next %}
                             <a href="?page={{ page_obj.next_page_number }}">Next</a>
                             <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
@@ -215,9 +208,8 @@
                             </div>
                         </div>
                         {% endfor %}
+                    </div>
                     </div>
-                    
-                       
             <!-- Footer Start -->
             <div class="container-fluid pt-4 px-4">
                 <div class="bg-light rounded-top p-4">
@@ -237,10 +229,6 @@
             <!-- Footer End -->
         </div>
         <!-- Content End -->
-
-
-        <!-- Back to Top -->
-        <!-- <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a> -->
     </div>
 
     <!-- JavaScript Libraries -->

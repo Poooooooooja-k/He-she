@@ -65,7 +65,9 @@ class Category(models.Model):
     category_name=models.CharField(max_length=100)
     category_offer_description=models.CharField(max_length=100,null=True,blank=True)
     category_offer=models.PositiveBigIntegerField(default=0)
-    is_active=models.BooleanField(default=True)
+    is_active     =models.BooleanField(default=True)
+    active        =models.BooleanField(default=True)
+
 
     def __str__(self):
         return self.category_name
@@ -74,6 +76,7 @@ class Category(models.Model):
 class Sub_category(models.Model):
     main_category=models.ForeignKey(Category,on_delete=models.CASCADE)
     sub_category_name=models.CharField(max_length=100)
+    active        =models.BooleanField(default=True)
 
 
     def __str__(self):
@@ -99,7 +102,7 @@ class Product(models.Model):
     section         =models.ForeignKey(Section,on_delete=models.CASCADE,blank=True,null=True)
     color          =models.CharField(max_length=100,null=True,blank=True)
     product_offer = models.DecimalField(max_digits=5, decimal_places=2,max_length=100, blank=True, null=True)
-
+    deleted    =models.BooleanField(default=False)
 
     def __iter__(self):
         yield self.id

@@ -39,6 +39,7 @@ urlpatterns=[
     path('product/<int:product_id>/edit_product/', views.edit_product, name='edit_product'),
     path('product/<int:product_id>/update_product/',views.update_product,name='update_product'),
     path('product/<int:product_id>/delete_product/',views.delete_product,name='delete_product'),
+    path('restore_product/<int:product_id>/', views.restore_product, name='restore_product'),
     
     path('verify_otp/',views.verify_signup,name='verify_signup'),
     path('logout/',views.logout,name='logout'),

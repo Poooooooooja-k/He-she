@@ -370,14 +370,15 @@ def edit_category(request, category_id):
 
 def delete_category(request, category_id):
     try:
-        category = Category.objects.get(id=category_id)
+         category = Category.objects.get(id=category_id)
+         category.active = not category.active
+         category.save()
     except Category.DoesNotExist:
-        return HttpResponse("Category does not exist")
-    category.delete()
-    categories = Category.objects.all()
-    context = {'categories': categories}
-    return render(request, 'category.html', context)
-
+         return render(request, 'category_not_found.html')
+    category = Category.objects.all()
+    context={'category':category}
+    
+    return redirect('category')
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache  
@@ -454,18 +455,16 @@ def update_sub_category(request, sub_category_id):
         return redirect('sub_category')
     return render(request, 'edit_sub_category.html')
 
-
-def delete_sub_category(request, sub_id):
+def delete_sub_category(request,sub_id):
     try:
         sub_category = Sub_category.objects.get(id=sub_id)
+        sub_category.active = not sub_category.active
+        sub_category.save()
     except Sub_category.DoesNotExist:
-        return render(request, 'category_not_found.html')
-    sub_category.delete()
+         return render(request, 'sub_category_not_found.html')
     sub_category = Sub_category.objects.all()
+    context = {'categories': sub_category}
     return redirect('sub_category')
-
-
-
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache  
@@ -584,15 +583,25 @@ def update_product(request, product_id):
             'product': product,
         }
         return render(request, 'product.html', context)
+    
 
 def delete_product(request, product_id):
     try:
         product = Product.objects.get(id=product_id)
+        product.deleted = True
+        product.save()
     except Product.DoesNotExist:
-        return render(request, 'category_not_found.html')
-    product.delete()
+         return render(request, 'product_not_found.html')
     return redirect('product')
 
+def restore_product(request, product_id):
+    try:
+        product = Product.objects.get(id=product_id)
+        product.deleted = False  
+        product.save()
+    except Product.DoesNotExist:
+        pass
+    return redirect('product')
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @never_cache    
@@ -614,7 +623,7 @@ def userproductpage(request,id):
 
 def shop(request):
     # Get all products and unique colors
-    all_products = Product.objects.all()
+    all_products = Product.objects.filter(deleted=False)
     unique_colors = Product.objects.values('color').annotate(count=Count('color')).order_by('color')
     brands = Product.objects.values_list('product_name', flat=True).distinct()
     # Filter products based on brand, color, and price
@@ -1310,7 +1319,7 @@ def delete_section(request,section_id):
 
 def mens_watches(request):
     mens_watches_category = Category.objects.get(category_name="Men's watch")
-    mens_watches_products = Product.objects.filter(category=mens_watches_category)
+    mens_watches_products = Product.objects.filter(category=mens_watches_category,deleted=False)
     selected_brand = request.GET.get('brand')
     selected_color = request.GET.get('color')
     selected_price = request.GET.get('price')
@@ -1365,7 +1374,7 @@ def mens_watches(request):
 
 def womens_watches(request):
     womens_watches_category = Category.objects.get(category_name="womens watch")
-    womens_watches_products = Product.objects.filter(category=womens_watches_category)
+    womens_watches_products = Product.objects.filter(category=womens_watches_category,deleted=False)
     selected_brand = request.GET.get('brand')
     selected_color = request.GET.get('color')
     selected_price = request.GET.get('price')
@@ -1446,22 +1455,15 @@ def apply_coupon(request):
         user = request.user
         try:
             couponuser = CustomUser.objects.get(email=user)
-            userid = couponuser.id
-           
-            
+            userid = couponuser.id  
         except CustomUser.DoesNotExist:
             messages.error(request, "Customer not found.")
             return redirect('cart')
-        
-       
-
-
         cart_items = Cart.objects.filter(user=user)
         subtotal = 0
         shipping_cost = 10
         total_dict = {}
         coupons = Coupon.objects.all()
-
         for cart_item in cart_items:
             if cart_item.quantity > cart_item.product.stock:
                 messages.warning(request, f"{cart_item.product.product_name} is out of stock.")
@@ -1479,7 +1481,6 @@ def apply_coupon(request):
                 item_price = cart_item.product.price * cart_item.quantity
                 total_dict[cart_item.id] = item_price
                 subtotal += item_price
-
         try:
             usedCoupon = UsedCoupon.objects.get(user_id=userid , coupon_id = usedcouponid )
             messages.error(request, "Coupon already applied")
@@ -1488,7 +1489,6 @@ def apply_coupon(request):
             # If the coupon code is valid and hasn't been used by the user, apply it here
             try:
                 coupon = Coupon.objects.get(coupon_code=coupon_code)
-
                 if subtotal >= coupon.minimum_amount:
                     messages.success(request, 'Coupon applied successfully')
                     # UsedCoupon.objects.create(user_id=userid, coupon=coupon)  # Create a record that coupon is used
@@ -1500,12 +1500,9 @@ def apply_coupon(request):
             except Coupon.DoesNotExist:
                 messages.error(request, 'Invalid coupon code')
                 total = subtotal + shipping_cost
-
         for cart_item in cart_items:
             cart_item.total_price = total_dict.get(cart_item.id, 0)
             cart_item.save()
-
-
         context = {
             'cart_items': cart_items,
             'subtotal': subtotal,
@@ -1514,7 +1511,6 @@ def apply_coupon(request):
             'discount_amount': request.session.get('discount',0),
         }
         return render(request, 'cartt.html', context)
-    
     return redirect('cartt')
 
 
@@ -1711,13 +1707,15 @@ def invoice(request, id):
     user = request.user
     orders = Order.objects.filter(id=id)
     order_items = OrderItem.objects.filter(order=id)
-     
+    discount_amount = request.session.get('discount', 0)
     for order in orders:
         address= order.address
-
         for item in order_items:
+            product_offer = None
+            if item.product.category.category_offer:
+                product_offer = item.product.category.category_offer
             # 2. Render the order and items to an HTML template
-            rendered = render_to_string('invoice.html', {'order': order, 'item': item, 'address':address})
+            rendered = render_to_string('invoice.html', {'order': order, 'item': item, 'address':address, 'discount_amount': discount_amount,  'product_offer': product_offer,})
             # 3. Convert the rendered HTML to PDF
             output = io.BytesIO()
             pdf = pisa.CreatePDF(rendered, output)

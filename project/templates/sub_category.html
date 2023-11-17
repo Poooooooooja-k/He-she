@@ -134,35 +134,27 @@
                                     <th scope="col">id</th>
                                     <th scope="col">Sub Category Name</th>
                                     <th scope="col">Main Category Name</th>
-                                    
-                                    <th scope ="col">Manage</th>
-                            
-                                    
+                                    <th scope ="col">Manage</th>        
                                 </tr>
                             </thead>
                             <tbody>
                                 
                                 {% for sub in subcategories %}
-                                
-                
                                 <tr>
                                     <td>{{ sub.id }}</td>
                                     <td>{{ sub.sub_category_name }}</td>
                                     <td>{{ sub.main_category.category_name }}</td>
-                    
-
-                                
-                                    
                                         <td>
                                             <a href="{% url 'edit_sub_category' sub_category_id=sub.id %}" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
-                                            <a href="" class="delete" data-toggle="modal" data-target="#deleteModal{{ sub.id }}"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
+                                            <a href="" class="toggle-active" data-toggle="modal" data-target="#toggleActiveModal{{ sub.id }}">
+                                                {% if sub.active %}
+                                                    Deactivate
+                                                {% else %}
+                                                        Activate
+                                                {% endif %} 
+                                            </a>
                                         </td>
-                                        
-        
-        
                                 </tr>
-                                
-                               
                                 {% endfor %}
                                
                             </tbody>
@@ -184,32 +176,35 @@
                         </div>
                         <!-- Delete confirmation modals -->
                         {% for sub in subcategories %}
-                        <div class="modal fade" id="deleteModal{{ sub.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                        <div class="modal fade" id="toggleActiveModal{{ sub.id }}" tabindex="-1" role="dialog" aria-labelledby="toggleActiveModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="deleteModalLabel">Delete sub category</h5>
+                                        <h5 class="modal-title" id="toggleActiveModalLabel">
+                                            {% if sub.active %}
+                                                Deactivate Category "{{ sub.sub_category_name }}"
+                                            {% else %}
+                                                Activate Category "{{ sub.sub_category_name }}"
+                                            {% endif %}
+                                        </h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <p>Are you sure you want to delete this category?</p>
+                                        <p>Are you sure you want to {% if sub.active %}deactivate{% else %}activate{% endif %} the sub category "{{ sub.sub_category_name }}"?</p>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                         <form action="{% url 'delete_sub_category' sub_id=sub.id %}" method="post">
                                             {% csrf_token %}
-                                            <input type="submit" class="btn btn-danger" value="Delete">
+                                            <input type="submit" class="btn btn-danger" value="{% if sub_category.active %}Deactivate{% else %}Activate{% endif %}">
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
-                        
-
-
+                    {% endfor %}
             <!-- Footer Start -->
             <div class="container-fluid pt-4 px-4">
                 <div class="bg-light rounded-top p-4">
@@ -229,10 +224,6 @@
             <!-- Footer End -->
         </div>
         <!-- Content End -->
-
-
-        <!-- Back to Top -->
-        <!-- <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a> -->
     </div>
 
     <!-- JavaScript Libraries -->

@@ -103,7 +103,6 @@
                         <th>Product</th>
                         <th>Quantity</th>
                         <th>Price</th>
-                        <!-- <th>Discount</th> -->
                         <th>Payment type</th>
                         <th>Total</th>
                     </tr>
@@ -115,12 +114,20 @@
                         <td>{{ item.product.price }}</td>
                         <td>{{ order.payment_type }}</td>
                         <td>{{ order.amount }}</td>
+
                     </tr>
                 </tbody>
             </table>
             <div class="invoice-total">
-                <!-- <strong>Sub total:</strong>  ${{subtotal}} -->
-                <br>
+                <br> 
+                {% if product_offer %}     
+                    <td><strong>Product Offer</strong></td>
+                    <td>{{ product_offer }}%</td>
+                {% endif %}
+                {% if discount_amount > 0 %}
+                    <br>
+                    <strong>Coupon Discount:</strong> ${{ discount_amount }}
+                {% endif %}
                 <strong>Total Amount:</strong> ${{ order.amount }}
             </div>
             <h2 class="display-3 text-primary" style="text-align:center;">Thank you for Purchasing with us!</h2>
