@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>products</title>
+    <title>sub category</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -140,21 +140,24 @@
                             <tbody>
                                 
                                 {% for sub in subcategories %}
-                                <tr>
-                                    <td>{{ sub.id }}</td>
-                                    <td>{{ sub.sub_category_name }}</td>
-                                    <td>{{ sub.main_category.category_name }}</td>
-                                        <td>
-                                            <a href="{% url 'edit_sub_category' sub_category_id=sub.id %}" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
-                                            <a href="" class="toggle-active" data-toggle="modal" data-target="#toggleActiveModal{{ sub.id }}">
-                                                {% if sub.active %}
-                                                    Deactivate
-                                                {% else %}
-                                                        Activate
-                                                {% endif %} 
-                                            </a>
-                                        </td>
-                                </tr>
+                                    <tr>
+                                        <td>{{ sub.id }}</td>
+                                        <td>{{ sub.sub_category_name }}</td>
+                                        <td>{{ sub.main_category.category_name }}</td>
+                                            <td>
+                                                <a href="{% url 'edit_sub_category' sub_category_id=sub.id %}" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
+                                                <a href="" class="toggle-active" data-toggle="modal" data-target="#toggleActiveModal{{ sub.id }}">
+                                                    {% if sub.active %}
+                                                        Deactivate
+                                                    {% else %}
+                                                    <a href="{% url 'restore_subcategory' sub_category_id=sub.id %}" class="restore" data-toggle="tooltip" title="Restore">
+                                                        <i class="material-icons" title="Restore">restore</i>
+                                                    </a>                                                
+                                                        <br><span style="color:red;"class="soft-deleted-label">Soft Deleted</span>
+                                                    {% endif %} 
+                                                </a>
+                                            </td>
+                                    </tr>
                                 {% endfor %}
                                
                             </tbody>

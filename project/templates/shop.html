@@ -35,7 +35,7 @@
 						<select name="brand" id="brand" class="form-control">
 							<option value="" selected disabled>Select a brand</option>
 							{% for brand in brands %}
-								<option value="{{ brand }}">{{ brand }}</option>
+								<option value="{{ brand }}"{% if brand == request.GET.brand %} selected {% endif %}">{{ brand }}</option>
 							{% endfor %}
 						</select>
 					</div>
@@ -46,7 +46,7 @@
 				<select name="color" id="color" class="form-control">
 					<option value="">All Colors</option>
 					{% for color in unique_colors %}
-					<option value="{{ color.color }}">{{ color.color }}</option>
+					<option value="{{ color.color }}"{% if color.color == request.GET.color %} selected {% endif %}>{{ color.color }}</option>
 					{% endfor %}
 				</select>
 				</div>
@@ -58,7 +58,7 @@
 					<select name="sub_category" id="sub_category" class="form-control">
 						<option value="" selected disabled>Select a category</option>
 						{% for subcategory in subcategories %}
-							<option value="{{ subcategory.sub_category_name }}">{{ subcategory.sub_category_name }}</option>
+							<option value="{{ subcategory.sub_category_name }}"{% if subcategory.sub_category_name == request.GET.subcategory %} selected {% endif %}>{{ subcategory.sub_category_name }}</option>
 						{% endfor %}
 					</select>
 				</div>
@@ -68,13 +68,13 @@
 			<label for="price">Price Range:</label>
 			<select name="price" id="price" class="form-control">
 			<option value="">All Prices</option>
-			<option value="price1">Below 500</option>
-			<option value="price2">500-1000</option>
-			<option value="price3">1000-5000</option>
-			<option value="price4">5000-10,000</option>
-			<option value="price5">10,000-25,000</option>
-			<option value="price6">25,000-50,000</option>
-			<option value="price7">Above 50,000</option>
+			<option value="price1"{% if request.GET.price == 'price1' %} selected {% endif %}>Below 500</option>
+			<option value="price2"{% if request.GET.price == 'price2' %} selected {% endif %}>500-1000</option>
+			<option value="price3"{% if request.GET.price == 'price3' %} selected {% endif %}>1000-5000</option>
+			<option value="price4"{% if request.GET.price == 'price4' %} selected {% endif %}>5000-10,000</option>
+			<option value="price5"{% if request.GET.price == 'price5' %} selected {% endif %}>10,000-25,000</option>
+			<option value="price6"{% if request.GET.price == 'price6' %} selected {% endif %}>25,000-50,000</option>
+			<option value="price7"{% if request.GET.price == 'price7' %} selected {% endif %}>Above 50,000</option>
 			<!-- Add more price options here -->
 		  </select>
 		</div>

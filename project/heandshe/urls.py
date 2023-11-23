@@ -22,6 +22,7 @@ urlpatterns=[
     path('category/<int:id>/update_category/',views.update_category,name='update_category'),
     path('category/<int:category_id>/edit_category/', views.edit_category, name='edit_category'),
     path('category/<int:category_id>/delete_category/',views.delete_category,name='delete_category'),
+    path('restore_category/<int:category_id>/',views.restore_category,name='restore_category'),
 
 
 
@@ -31,6 +32,8 @@ urlpatterns=[
     path('category/<int:sub_category_id>/update_sub_category/', views.update_sub_category, name='update_sub_category'),
     path('category/<int:sub_category_id>/edit_sub_category/', views.edit_sub_category, name='edit_sub_category'),
     path('category/<int:sub_id>/delete_sub_category/',views.delete_sub_category,name='delete_sub_category'),
+    path('restore_subcategory/<int:sub_category_id>/',views.restore_subcategory, name='restore_subcategory'),
+
    
 
     # products

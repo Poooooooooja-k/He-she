@@ -371,13 +371,21 @@ def edit_category(request, category_id):
 def delete_category(request, category_id):
     try:
          category = Category.objects.get(id=category_id)
-         category.active = not category.active
+         category.active = True
          category.save()
     except Category.DoesNotExist:
-         return render(request, 'category_not_found.html')
+         return HttpResponse("Category Not Found")
     category = Category.objects.all()
     context={'category':category}
-    
+    return redirect('category')
+
+def restore_category(request,category_id):
+    try:
+        category=Category.objects.get(id=category_id)
+        category.active=False
+        category.save()
+    except Category.DoesNotExist:
+        return HttpResponse("Category Not Found")
     return redirect('category')
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
@@ -454,23 +462,32 @@ def update_sub_category(request, sub_category_id):
         sub_category.save()
         return redirect('sub_category')
     return render(request, 'edit_sub_category.html')
-
 def delete_sub_category(request,sub_id):
     try:
         sub_category = Sub_category.objects.get(id=sub_id)
-        sub_category.active = not sub_category.active
+        # Set active to False to deactivate
+        sub_category.active = False
+        sub_category.save()
+        messages.success(request, 'Subcategory deactivated.')
+    except Sub_category.DoesNotExist:
+        messages.error(request, 'Subcategory not found.')
+        return render(request, 'sub_category_not_found.html')
+    return redirect('sub_category')
+
+def restore_subcategory(request,sub_category_id):
+    try:
+        sub_category=Sub_category.objects.get(id=sub_category_id)
+        sub_category.active=False
         sub_category.save()
     except Sub_category.DoesNotExist:
-         return render(request, 'sub_category_not_found.html')
-    sub_category = Sub_category.objects.all()
-    context = {'categories': sub_category}
+        return HttpResponse("subcategory not found")
     return redirect('sub_category')
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 @never_cache  
 def product(request):
     if 'admin' in request.session:
-        products        = Product.objects.all().order_by('id')       
+        products  = Product.objects.all().order_by('id')       
         paginator = Paginator(products, 3)  
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -1435,17 +1452,19 @@ def coupon(request):
 
 def add_coupon(request):
     if request.method == 'POST':
-        coupon_code    = request.POST.get('Couponcode')
-        discount_price  = request.POST.get('dprice')
+        coupon_code = request.POST.get('Couponcode')
+        discount_price = request.POST.get('dprice')
         minimum_amount = request.POST.get('amount')
-        expiry_date=request.POST.get('date')
+        expiry_date = request.POST.get('date')
+        if Coupon.objects.filter(coupon_code=coupon_code).exists():
+            messages.error(request, 'Coupon with this code already exists.')
+            return redirect('coupon')
         if float(discount_price) < 0:
             messages.error(request, 'Discount price cannot be less than 0')
             return redirect('coupon')
-        coupon = Coupon(coupon_code=coupon_code, discount_price=discount_price, minimum_amount=minimum_amount,expiry_date=expiry_date)
+        coupon = Coupon(coupon_code=coupon_code, discount_price=discount_price, minimum_amount=minimum_amount, expiry_date=expiry_date)
         coupon.save()
         return redirect('coupon')
-    
 
 def apply_coupon(request):
     if request.method == 'POST':
@@ -1527,7 +1546,6 @@ def edit_coupon(request,id):
     else:
         return redirect ('admin')
     
-
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @never_cache
 def update_coupon(request, id):
