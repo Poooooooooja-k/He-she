@@ -57,27 +57,14 @@
             margin-right: 5px;
         }
     </style>
-
-
 </head>
-
 <body>
     <div class="container-xxl position-relative bg-white d-flex p-0">
-        <!-- Spinner Start -->
-        <!-- <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
-            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                <span class="sr-only">Loading...</span>
-            </div>
-        </div> -->
-        <!-- Spinner End -->
-
-    
        <!-- Sidebar Start -->
        <div class="sidebar pe-4 pb-3">
         {% include 'snippets/adminsidebar.html' %}
     </div>
     <!-- Sidebar End -->
-
         <!-- Content Start -->
         <div class="content">
             <!-- Navbar Start -->
@@ -88,7 +75,6 @@
                 <a href="#" class="sidebar-toggler flex-shrink-0">
                     <i class="fa fa-bars"></i>
                 </a>
-                
                 <div class="navbar-nav align-items-center ms-auto">
                     <div class="nav-item dropdown">
                         <!-- <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
@@ -99,7 +85,6 @@
                             
                         </div>
                     </div>
-                    
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                             <img class="rounded-circle me-lg-2" src="{% static 'admin/admin/img/looogoo.png' %}" alt="" style="width: 40px; height: 40px;">
@@ -113,9 +98,6 @@
                     </div>
                 </div>
             </nav>
-          
-
-
             <!-- Recent Sales Start -->
             <div class="container-fluid pt-4 px-4">
                 <div class="bg-light text-center rounded p-4">
@@ -150,10 +132,7 @@
                                                     {% if sub.active %}
                                                         Deactivate
                                                     {% else %}
-                                                    <a href="{% url 'restore_subcategory' sub_category_id=sub.id %}" class="restore" data-toggle="tooltip" title="Restore">
-                                                        <i class="material-icons" title="Restore">restore</i>
-                                                    </a>                                                
-                                                        <br><span style="color:red;"class="soft-deleted-label">Soft Deleted</span>
+                                                        Activate
                                                     {% endif %} 
                                                 </a>
                                             </td>
@@ -201,7 +180,7 @@
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                         <form action="{% url 'delete_sub_category' sub_id=sub.id %}" method="post">
                                             {% csrf_token %}
-                                            <input type="submit" class="btn btn-danger" value="{% if sub_category.active %}Deactivate{% else %}Activate{% endif %}">
+                                            <input type="submit" class="btn btn-danger" value="{% if sub.active %}Deactivate{% else %}Activate{% endif %}">
                                         </form>
                                     </div>
                                 </div>
@@ -228,7 +207,6 @@
         </div>
         <!-- Content End -->
     </div>
-
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -239,16 +217,10 @@
     <script src="lib/tempusdominus/js/moment.min.js"></script>
     <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
     <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
-
     <!-- Template Javascript -->
     <script src="{% static 'admin/js/main.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.5.0/js/bootstrap.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
-
 </body>
-
-
-
 </html>

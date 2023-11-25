@@ -66,28 +66,20 @@ class Category(models.Model):
     category_offer_description=models.CharField(max_length=100,null=True,blank=True)
     category_offer=models.PositiveBigIntegerField(default=0)
     active        =models.BooleanField(default=False)
-
-
     def __str__(self):
         return self.category_name
-
 
 class Sub_category(models.Model):
     main_category=models.ForeignKey(Category,on_delete=models.CASCADE)
     sub_category_name=models.CharField(max_length=100)
-    active        =models.BooleanField(default=False)
-    
+    active           =   models.BooleanField(default=True)
     def __str__(self):
         return self.sub_category_name
 
-
 class Section(models.Model):
     name=models.CharField(max_length=200)
-
     def __str__(self):
         return self.name
-
-
 
 class Product(models.Model):
     product_name    = models.CharField(max_length=100)

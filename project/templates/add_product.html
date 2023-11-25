@@ -100,7 +100,7 @@
                                         {% if not category.active %}
                                             <option value="{{ category.id }}">{{ category.category_name }}</option>
                                             {% for sub in category.sub_category_set.all %}
-                                            {% if not sub.active %}
+                                            {% if sub.active %}
                                             <option value="{{ sub.id }}">--{{ sub.sub_category_name }}</option>
                                             {% endif %}
                                         {% endfor %}

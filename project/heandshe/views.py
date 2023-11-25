@@ -462,25 +462,16 @@ def update_sub_category(request, sub_category_id):
         sub_category.save()
         return redirect('sub_category')
     return render(request, 'edit_sub_category.html')
+
 def delete_sub_category(request,sub_id):
     try:
         sub_category = Sub_category.objects.get(id=sub_id)
-        # Set active to False to deactivate
-        sub_category.active = False
+        sub_category.active = not sub_category.active
         sub_category.save()
         messages.success(request, 'Subcategory deactivated.')
     except Sub_category.DoesNotExist:
         messages.error(request, 'Subcategory not found.')
         return render(request, 'sub_category_not_found.html')
-    return redirect('sub_category')
-
-def restore_subcategory(request,sub_category_id):
-    try:
-        sub_category=Sub_category.objects.get(id=sub_category_id)
-        sub_category.active=False
-        sub_category.save()
-    except Sub_category.DoesNotExist:
-        return HttpResponse("subcategory not found")
     return redirect('sub_category')
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)

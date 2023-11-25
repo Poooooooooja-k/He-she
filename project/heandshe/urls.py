@@ -24,18 +24,13 @@ urlpatterns=[
     path('category/<int:category_id>/delete_category/',views.delete_category,name='delete_category'),
     path('restore_category/<int:category_id>/',views.restore_category,name='restore_category'),
 
-
-
     # sub category
     path('sub_category/', views.sub_category, name='sub_category'),
     path('add_sub_category/', views.add_sub_category, name='add_sub_category'),
     path('category/<int:sub_category_id>/update_sub_category/', views.update_sub_category, name='update_sub_category'),
     path('category/<int:sub_category_id>/edit_sub_category/', views.edit_sub_category, name='edit_sub_category'),
     path('category/<int:sub_id>/delete_sub_category/',views.delete_sub_category,name='delete_sub_category'),
-    path('restore_subcategory/<int:sub_category_id>/',views.restore_subcategory, name='restore_subcategory'),
-
-   
-
+    
     # products
     path('product/',views.product,name='product'),
     path('add_product/',views.add_product,name='add_product'),
@@ -54,17 +49,12 @@ urlpatterns=[
     path('profile/',views.profile,name='profile'),
     path('update_profile/',views.update_profile,name='update_profile'),
 
-
-
     # address
     path('address/',views.address,name='address'),
     path('add_address/',views.add_address,name='add_address'),
     path('edit_address/<int:id>/', views.edit_address, name='edit_address'),
     path('delete_address/<int:id>/', views.delete_address, name='delete_address'),
-
-
     path('changepassword/',views.changepassword,name='changepassword'),
-
 
     #wishlist
     path('wishlist/',views.wishlist, name='wishlist'),
@@ -158,7 +148,6 @@ urlpatterns=[
     path('adminside_message/',views.adminside_message,name='adminside_message'),
     path('reply/',views.reply,name='reply'),
   
-
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
